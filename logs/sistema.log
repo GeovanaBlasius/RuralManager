@@ -1,0 +1,40 @@
+[2025-12-01 14:11:50] [INFO] Carregados 0 produtores do banco
+[2025-12-01 14:12:49] [INFO] Carregados 0 produtores do banco
+[2025-12-01 14:19:38] [INFO] Carregados 0 produtores do banco
+[2025-12-01 14:21:14] [ERRO] Erro cadastro produtor: Nome deve ter pelo menos 3 caracteres
+[2025-12-01 14:28:45] [INFO] Carregados 0 produtores do banco
+[2025-12-01 14:32:07] [INFO] Carregados 5 produtores do banco
+[2025-12-01 14:32:54] [INFO] Carregados 5 produtores do banco
+[2025-12-01 14:35:21] [INFO] Carregados 0 produtores do banco
+[2025-12-01 14:35:36] [INFO] Backup SQL realizado: backups/backup_ruralmanager_20251201_143536.sql (2 KB)
+[2025-12-01 14:41:13] [INFO] Carregados 0 produtores do banco
+[2025-12-01 14:47:57] [INFO] Carregados 0 produtores do banco
+[2025-12-01 15:14:57] [INFO] Carregados 0 produtores do banco
+[2025-12-01 16:19:32] [INFO] Carregados 0 produtores do banco
+[2025-12-01 16:23:26] [INFO] Carregados 0 produtores do banco
+[2025-12-01 16:25:06] [INFO] Carregados 0 produtores do banco
+[2025-12-01 16:29:31] [INFO] Carregados 0 produtores do banco
+[2025-12-01 16:30:58] [ERRO] Erro cadastro produtor: CPF deve conter 11 dígitos
+[2025-12-01 16:31:13] [ERRO] Erro cadastro produtor: CPF deve conter 11 dígitos
+[2025-12-01 16:31:50] [ERRO] Erro cadastro produtor: CPF deve conter 11 dígitos
+[2025-12-01 16:32:10] [ERRO] Erro cadastro produtor: CPF inválido
+[2025-12-01 16:32:52] [ERRO] Erro cadastro produtor: Nome deve ter pelo menos 3 caracteres
+[2025-12-01 16:33:33] [ERRO] Erro cadastro produtor: CPF deve conter 11 dígitos
+[2025-12-01 16:33:44] [ERRO] Erro cadastro produtor: CPF inválido (dígitos repetidos)
+[2025-12-01 16:34:13] [ERRO] Erro cadastro produtor: CPF inválido
+[2025-12-01 16:35:56] [INFO] Carregados 0 produtores do banco
+[2025-12-01 16:36:34] [OPERACAO] CADASTRO PRODUTOR - ID: 1, Nome: ana, CPF: 12345678912
+[2025-12-01 16:36:57] [ERRO] Erro cadastro produtor: Telefone deve ter 10 ou 11 dígitos
+[2025-12-01 16:37:30] [OPERACAO] CADASTRO PRODUTOR - ID: 2, Nome: ana, CPF: 01234567892
+[2025-12-01 16:37:42] [OPERACAO] SELECIONAR PRODUTOR - Produtor: ana (CPF: 01234567892)
+[2025-12-01 16:38:04] [OPERACAO] SELECIONAR PRODUTOR - Produtor: ana (CPF: 01234567892)
+[2025-12-01 16:38:32] [OPERACAO] CADASTRAR SAFRA - Produtor: ana, Ano: 2025
+[2025-12-01 16:39:32] [INFO] Carregados 2 produtores do banco
+[2025-12-01 16:39:50] [OPERACAO] SELECIONAR PRODUTOR - Produtor: ana (CPF: 12345678912)
+[2025-12-01 19:45:32] [INFO] Carregados 0 produtores do banco
+[2025-12-01 20:45:25] [INFO] Carregados 0 produtores do banco
+[2025-12-01 21:03:53] [INFO] Carregados 0 produtores do banco
+[2025-12-01 21:04:23] [OPERACAO] CADASTRO PRODUTOR - ID: 1, Nome: Ana, CPF: 12345678912
+[2025-12-01 21:04:27] [OPERACAO] SELECIONAR PRODUTOR - Produtor: Ana (CPF: 12345678912)
+[2025-12-01 21:04:41] [OPERACAO] CADASTRAR SAFRA - Produtor: Ana, Ano: 2025
+[2025-12-01 21:05:15] [OPERACAO] CADASTRAR CULTURA - Safra: 2025, Cultura: Trigo
