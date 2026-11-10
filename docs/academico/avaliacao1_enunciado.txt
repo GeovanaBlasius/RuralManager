@@ -1,0 +1,318 @@
+​
+Instituto Federal Catarinense
+Alunos: Davi Bianchi Ayres e Geovana Blasius
+Disciplina: Banco de Dados I
+Professor: Patricia Blini Estivalete
+Data: 29/09/2026
+
+
+
+                        1ª Avaliação de Aprendizagem
+   RuralManager: Sistema de Gestão Agrícola para Pequenos e Médios Produtores ​
+
+
+
+   ●​ Cenário
+
+Pequenos e médios produtores rurais enfrentam dificuldades para organizar informações
+sobre suas propriedades, especialmente no controle de safras, culturas, gastos, produtos e
+vendas da produção. O uso de cadernos e planilhas dificulta o acompanhamento dos custos e
+da produção, além de tornar mais difícil a comparação entre diferentes safras e culturas.
+
+Como solução, foi proposto o RuralManager, um sistema de gestão agrícola que centraliza
+essas informações e permite o acompanhamento dos dados relacionados à produção e à
+comercialização das culturas.
+
+
+
+Produtor
+
+▪ Todo produtor atendido pelo sistema deve ser cadastrado e identificado por seu CPF, que
+não pode se repetir entre dois cadastros. Além do CPF, o sistema registra o nome completo do
+produtor, um telefone de contato e, opcionalmente, o endereço da propriedade. O CPF é
+validado quanto ao formato. O sistema também registra a data e a hora em que cada produtor
+foi inserido, apenas para controle interno.
+
+
+
+Safra
+
+▪ Cada produtor pode possuir uma ou várias safras registradas, enquanto cada safra pertence a
+apenas um produtor. A safra representa um período de produção e é identificada por um ano
+de início e um ano de fim, permitindo representar períodos como a safra 2026/2027, que se
+inicia em um ano e termina no seguinte, ou safras realizadas dentro de um único ano civil,
+quando os dois anos coincidem.
+▪ Os anos de início e fim são obrigatórios. O ano de início deve ser igual ou superior a 1900,
+e o ano de fim não pode ser anterior ao ano de início nem excedê-lo em mais de um ano, de
+modo que a safra represente sempre um único período de produção. Além dos anos de início
+e fim, o sistema pode registrar uma descrição opcional da safra, permitindo adicionar
+observações ou uma identificação complementar do período de produção.
+
+
+
+Produto
+
+▪ O sistema deve permitir o cadastro dos produtos cultivados, como soja, milho, feijão,
+arroz ou alho. Cada produto é identificado por um nome e pode estar associado a
+diferentes culturas. O produto representa o tipo de produção agrícola, enquanto as
+informações específicas do plantio são registradas na entidade Cultura e as informações
+referentes à produção colhida são registradas na entidade Colheita.
+
+
+
+Cultura
+
+▪ Dentro de cada safra o produtor cadastra as culturas que plantou. Cada cultura pertence a
+uma única safra e refere-se a um único produto, como soja, milho, feijão ou alho. De cada
+cultura o sistema registra a variedade ou cultivar utilizada, a área plantada em hectares e a
+data em que o plantio foi realizado.
+
+▪ A área plantada é obrigatória e deve ser maior que zero. A data de plantio também é
+obrigatória, não pode ser futura e deve estar compreendida no período definido pela safra em
+que a cultura está sendo cadastrada.
+
+▪ Dentro de uma mesma safra não podem existir duas culturas do mesmo produto com a
+mesma variedade. Se o produtor plantar duas variedades diferentes da mesma espécie e quiser
+acompanhá-las separadamente, deve cadastrar uma cultura para cada variedade.
+
+
+
+Unidade de Medida
+
+▪ O sistema deve permitir o cadastro das unidades em que a produção é medida, porque nem
+toda produção é medida em sacas de 60 quilos: os grãos saem em sacas de pesos diferentes,
+as hortaliças em quilos, a cana em toneladas e algumas culturas em unidades ou caixas. De
+cada unidade são registrados o nome, uma sigla e, quando existir, a quantos quilos ela
+equivale. Esse fator de conversão é o que permite comparar a produtividade entre culturas
+medidas de formas diferentes, e fica em branco para unidades sem peso definido, como a
+unidade avulsa e a dúzia.
+Categoria
+
+▪ O sistema deve permitir o cadastro das categorias utilizadas para classificar os gastos da
+produção. Entre os exemplos estão sementes, fertilizantes, defensivos, mão de obra,
+maquinário e outros itens. Cada categoria é identificada por um nome e pode estar associada
+a vários gastos. Uma categoria que já classifica algum gasto não pode ser removida.
+
+
+
+Gasto
+
+▪ Todo gasto pertence a uma safra, porque o objetivo do sistema é acompanhar o custo de um
+período de produção do início ao fim. Quando o produtor sabe de qual lavoura foi a despesa,
+ele informa também a cultura. Quando se trata de um custo geral, como o diesel do trator que
+passou em várias lavouras, o salário do funcionário, a energia do galpão ou o arrendamento
+da terra, a cultura fica em branco e o gasto continua vinculado à safra.
+
+▪ De cada gasto, o sistema guarda uma descrição do que foi adquirido ou contratado, a
+categoria a que pertence, o valor em reais e a data em que a despesa ocorreu. O valor lançado
+deve ser maior que zero e a data informada não pode ser futura.
+
+
+
+Colheita
+
+▪ Para cada cultura o produtor registra as colheitas realizadas, e cada colheita pertence a uma
+única cultura. O sistema permite várias colheitas por cultura, porque a produção pode ser
+retirada de uma só vez ou em etapas, conforme a lavoura e a conveniência do produtor.
+
+▪ De cada colheita são registrados a quantidade colhida, a unidade de medida em que ela é
+expressa e a data em que a colheita foi realizada. Além disso, cada colheita possui seu gasto
+específico, a quantidade colhida deve ser maior que zero, e a data não pode ser futura nem
+anterior à data de plantio da cultura correspondente.
+
+▪ Uma cultura pode não possuir nenhuma uma colheita registrada, seja porque o ciclo ainda
+não terminou ou a lavoura se perdeu. A colheita representa a produção física: não guarda
+preço nem indicação de venda, porque a mesma colheita pode ser comercializada em partes.
+
+
+
+Destino
+
+▪ O sistema deve permitir o cadastro dos destinos dados à produção que não se convertem em
+venda, entre os quais consumo próprio, semente guardada, alimentação animal, parceria ou
+meação, troca por insumos, perda posterior à colheita e doação. Cada destino é identificado
+por um nome e pode classificar várias saídas. Além disso, um destino que já classifica
+alguma saída não pode ser removido.
+Saída
+
+▪ Nem toda produção colhida é comercializada. Parte pode ser consumida, armazenada,
+utilizada como semente, destinada aos animais, entregue ao proprietário, utilizada para quitar
+insumos ou perdida. As saídas registram essas destinações e permitem calcular o estoque
+restante.
+
+▪ Cada saída pertence a uma única colheita e possui um destino, registrando quantidade, data
+e observação opcional. A quantidade deve ser maior que zero e a data não pode ser futura
+nem anterior à colheita.
+
+▪ Uma colheita pode ter nenhuma, uma ou várias saídas, permitindo controlar diferentes
+destinações da produção.
+
+
+
+Cliente
+
+▪ O sistema deve permitir o cadastro dos clientes que compram a produção. De cada cliente
+são registrados o nome, CPF ou CNPJ, telefone e endereço. O CPF ou CNPJ de cada cliente
+deve ser único, não podendo ser utilizado em mais de um cadastro.
+
+
+
+Fatura
+
+▪ Cada fatura representa uma compra realizada por um único cliente e registra esse cliente e a
+data da compra, que não pode ser futura. Um cliente pode possuir várias faturas, enquanto
+cada fatura pertence a apenas um cliente.
+
+
+
+Item da Fatura
+
+▪ Cada item da fatura registra uma produção adquirida pelo cliente, identificando a colheita
+correspondente, a quantidade comprada e o preço unitário. Uma fatura pode possuir vários
+itens, enquanto cada item pertence a uma única fatura.
+
+▪ O preço informado no item da fatura corresponde ao valor pago por unidade da medida
+utilizada na respectiva colheita. O valor total do item é obtido pela multiplicação da
+quantidade comprada pelo preço unitário.
+   ●​ Regras de Negócio
+
+
+
+Produtor​
+​
+RN01: Um produtor pode possuir uma ou várias safras e cada safra pertence a um único
+produtor, permitindo o acompanhamento de diferentes períodos de produção.
+
+
+
+Safra​
+​
+RN02: Uma safra pode abrigar uma ou várias culturas e cada cultura pertence a uma única
+safra, permitindo registrar diferentes plantios dentro do mesmo período de produção.
+
+RN03: Uma safra pode acumular vários gastos e cada gasto pertence a uma única safra,
+permitindo apurar o custo total do período.
+
+
+
+Produto ​
+​
+RN04: Um produto pode estar associado a várias culturas, enquanto cada cultura pertence a
+um único produto. Um mesmo produto pode ser cultivado em diferentes safras e uma mesma
+safra pode possuir diferentes produtos, caracterizando uma relação muitos-para-muitos entre
+Safra e Produto, realizada por meio da entidade Cultura.
+
+
+
+Cultura​
+​
+RN05: Uma cultura pode estar associada a vários gastos, enquanto um gasto pode estar
+associado a nenhuma ou a uma única cultura, permitindo registrar tanto despesas específicas
+de uma cultura quanto despesas gerais da safra.
+
+RN06: Cada cultura pode possuir nenhuma, uma ou várias colheitas, e cada colheita pertence
+a uma única cultura, permitindo registrar culturas que ainda não foram colhidas, bem como
+produções retiradas de uma só vez ou em etapas.
+Unidade de Medida ​
+​
+RN07: Cada unidade de medida pode medir várias colheitas e cada colheita é expressa em
+uma única unidade de medida, permitindo registrar a produção em sacas de pesos diferentes,
+quilos, toneladas ou unidades.
+
+
+
+Categoria ​
+​
+RN08: Uma categoria pode estar associada a vários gastos e cada gasto está associado a uma
+categoria, permitindo classificar despesas de diferentes culturas dentro da mesma categoria.
+
+
+
+Colheita
+
+RN09: Uma colheita pode estar relacionada a vários itens de fatura e cada item de fatura está
+relacionado a uma única colheita, permitindo que a produção seja comercializada em
+diferentes compras ou para diferentes clientes.
+
+RN10: Uma colheita pode possuir nenhuma, uma ou várias saídas e cada saída pertence a
+uma única colheita, permitindo registrar a produção destinada a fins diversos da venda e
+apurar o estoque remanescente. A soma das quantidades comercializadas e destinadas não
+pode ultrapassar a quantidade total da colheita.
+
+RN11: Cada colheita possui um ou vários gastos e vários gastos pertencem a uma colheita.
+
+
+Destino
+
+RN12: Um destino pode classificar várias saídas e cada saída possui um único destino,
+permitindo distinguir o consumo próprio, semente guardada, alimentação animal, parceria ou
+meação, troca por insumos, perda posterior à colheita e doação.​
+
+
+Cliente
+
+RN13: Um cliente pode possuir várias faturas e cada fatura pertence a um único cliente,
+permitindo registrar diferentes compras realizadas pelo mesmo cliente ao longo do tempo.
+
+
+
+Fatura
+
+RN14: Uma fatura pode possuir um ou vários itens de fatura e cada item é de uma
+determinada fatura, permitindo registrar diferentes produtos de uma mesma compra.
+   ●​ Diagrama Entidade-Relacionamento (DER)​
+
+
+O modelo é apresentado na Figura 01, elaborado na notação pé de galinha, sendo composto
+por treze entidades e treze relacionamentos. Destacam-se duas entidades associativas:
+Cultura, que relaciona Safra e Produto, armazenando variedade, área plantada e data de
+plantio; e Item da Fatura, que relaciona Fatura e Colheita, armazenando quantidade comprada
+e preço unitário. A entidade Saída complementa o controle da produção ao registrar as
+retiradas de estoque que não configuram venda, de modo que a produção colhida, a
+comercializada, a destinada a outros fins e a remanescente possam ser distinguidas.
+
+A entidade Gasto está obrigatoriamente vinculada à Safra e opcionalmente à Cultura,
+permitindo registrar tanto despesas específicas de uma cultura quanto custos gerais da safra.
+
+
+
+
+                                              ​
+
+                                              ​
+
+
+
+
+                                              ​
+             Figura 01 - Imagem do Diagrama Entidade-Relacionamento no MySQL
+   ●​ Metodologia​
+
+
+O desenvolvimento do RuralManager foi realizado a partir de trabalhos desenvolvidos
+anteriormente no curso. O sistema teve sua primeira versão elaborada em C, na disciplina de
+Algoritmos, e posteriormente foi refeito em Java, na disciplina de Programação Orientada a
+Objetos I, quando também foi acrescentado um banco de dados. Entretanto, nessa etapa, a
+estrutura do banco foi criada com base nas classes existentes, sem a realização prévia de uma
+modelagem conceitual. Nesta disciplina, optou-se por revisar essa estrutura e desenvolver um
+melhor modelo, considerando as etapas de projeto de banco de dados estudadas.
+
+Como referência para essa etapa, foi utilizado o método apresentado por Rob e Coronel em
+Sistemas de Banco de Dados: Projeto, Implementação e Gerenciamento. Inicialmente, foi
+realizada a análise do cenário, buscando compreender o funcionamento do sistema, suas
+necessidades e as principais regras envolvidas no contexto da agricultura familiar. A partir
+dessa análise, foram definidas as regras de negócio que serviram como base para a construção
+do modelo.
+
+Na sequência, foram identificadas as principais entidades, atributos e relacionamentos
+presentes no sistema. As regras de negócio auxiliaram principalmente na definição das
+cardinalidades e participações de cada relacionamento. Também foram analisadas as
+situações em que seria necessário utilizar entidades associativas, como no relacionamento
+entre Safra e Produto, representado pela entidade Cultura, e entre Fatura e Colheita,
+representado por Item da Fatura.
+
+Dessa forma, o trabalho foi desenvolvido a partir da análise do cenário, definição das regras
+de negócio e elaboração do modelo entidade-relacionamento no MySQL. Essa organização
+permitiu revisar a estrutura anteriormente desenvolvida e estabelecer uma base mais
+adequada para possíveis implementações futuras do RuralManager.
+

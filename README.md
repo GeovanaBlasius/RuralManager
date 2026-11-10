@@ -1,39 +1,41 @@
-# Rural Manager
+# RuralManager
 
-Sistema de gestão rural em Java com banco de dados MySQL, desenvolvido como trabalho final da disciplina.
+Gestão agrícola para pequenos e médios produtores: safras, culturas, colheitas, gastos, vendas (faturas), estoque e relatórios de lucro, custo por hectare e produtividade. Site responsivo **instalável (PWA)**.
 
-**Disciplina:** Programação Orientada a Objetos I · trabalho final  
-**Tecnologias:** Java, MySQL, JDBC
+## Estrutura
+```
+pom.xml, src/          API Spring Boot (br.com.ruralmanager)
+src/main/resources/db/migration   V1..V8 (Postgres)
+frontend/              PWA React + Vite + TypeScript
+docs/                  CONTEXTO.md e material acadêmico
+Dockerfile, docker-compose.yml, .env.example
+```
 
-## Funcionalidades
+## Rodar localmente
+Requisitos: JDK 21, Maven 3.9+, Node 20+.
+```bash
+cp .env.example .env        # preencha RM_DB_URL, RM_DB_PASSWORD, RM_JWT_SECRET
+set -a; source .env; set +a
+mvn spring-boot:run          # API em :8080
+cd frontend && npm install && npm run dev   # app em :5173
+```
+Testes: `mvn test` (API) e `cd frontend && npm test`.
 
-- Cadastro e seleção de produtores rurais
-- Registro de culturas, safras, colheitas e gastos por produtor
-- Relatórios e cálculos por produtor (produção, custos)
-- Exportação de dados
-- Backup do banco em `.sql` e registro de logs
-- Inserção de dados de exemplo para testes
-
-## Arquitetura
-
-O projeto segue o padrão **DAO**, separando as camadas:
-
-| Pacote | Responsabilidade |
+## Variáveis de ambiente
+| Variável | Descrição |
 |---|---|
-| `model` | Entidades: `Produtor`, `Cultura`, `Safra`, `Colheita`, `Gasto` |
-| `DAO` | Acesso ao banco para cada entidade |
-| `service` | Regras de negócio, menus, cálculos e relatórios |
-| `database` | Conexão (`ConnectionFactory`), logs e dados de exemplo |
-| `util` | Validação, formatação e exportação |
-| `app` | Classe `Main` |
+| RM_DB_URL | JDBC do Postgres/Supabase (`sslmode=require`) |
+| RM_DB_USER / RM_DB_PASSWORD | credenciais do banco |
+| RM_JWT_SECRET | segredo HS256, 32+ caracteres |
+| RM_JWT_MINUTOS | validade do token (padrão 480) |
+| RM_CORS_ORIGENS | origens do front, separadas por vírgula |
+| RM_OPENAPI | `true` liga o Swagger em `/swagger-ui.html` |
 
-## Como executar
+## Deploy
+`docker compose up --build` sobe a API e o front (nginx, porta 8081, com proxy `/api`). Em hospedagem separada, builde o front com `VITE_API_URL=https://sua-api` e ajuste `RM_CORS_ORIGENS`. A API é stateless: escala horizontalmente atrás de um balanceador.
 
-1. Tenha um servidor **MySQL** rodando localmente.
-2. Ajuste `config.properties` com a URL, o usuário e a senha do seu banco.
-3. Adicione `lib/mysql-connector-j-9.5.0.jar` às bibliotecas do projeto no IntelliJ.
-4. Rode `src/app/Main.java` e use o menu no terminal.
+## Segurança
+JWT stateless, BCrypt(12), CPF/CNPJ validados por dígito verificador, isolamento por produtor (404 em recurso alheio), travas de linha no estoque, RLS ligado no Supabase, erros em ProblemDetail sem vazar stack. Limitações em `CLAUDE.md`.
 
----
-
-Desenvolvido por [Geovana Blasius](https://github.com/GeovanaBlasius) · Ciência da Computação, IFC Campus Rio do Sul
+## Status
+Front verificado (build, testes, navegador). **Backend Java ainda não compilado** — veja `CLAUDE.md` para os primeiros passos.

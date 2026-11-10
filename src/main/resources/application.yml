@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: ruralmanager
+  datasource:
+    # Credenciais SEMPRE por variavel de ambiente. Nunca escreva a senha aqui.
+    # Supabase: Project Settings > Database > Connection string (JDBC).
+    url: ${RM_DB_URL}
+    username: ${RM_DB_USER:postgres}
+    password: ${RM_DB_PASSWORD}
+    hikari:
+      # Pool pequeno de proposito: cada instancia abre poucas conexoes e o banco
+      # (Supabase) atende varias instancias. Escale instancias, nao o pool.
+      maximum-pool-size: ${RM_DB_POOL:10}
+      minimum-idle: 2
+      connection-timeout: 10000
+      max-lifetime: 1500000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Sao_Paulo
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 32
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # O banco do Supabase ja recebeu as migrations V1 a V8 direto. O baseline
+    # na V8 faz o Flyway aceitar esse estado e aplicar so as proximas (V9...).
+    baseline-on-migrate: true
+    baseline-version: 8
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful            # termina as requisicoes em andamento antes de parar
+  compression:
+    enabled: true
+  forward-headers-strategy: framework   # correto atras de balanceador/proxy
+
+rm:
+  seguranca:
+    jwt-secret: ${RM_JWT_SECRET}        # >= 32 caracteres; gere com: openssl rand -base64 48
+    jwt-expiracao-minutos: ${RM_JWT_MINUTOS:480}
+    cors-origens: ${RM_CORS_ORIGENS:http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true           # /actuator/health/liveness e /readiness
+
+springdoc:
+  # Documentacao da API desligada por padrao. Ligue so em desenvolvimento: RM_OPENAPI=true
+  api-docs:
+    enabled: ${RM_OPENAPI:false}
+  swagger-ui:
+    enabled: ${RM_OPENAPI:false}
+
+logging:
+  level:
+    root: INFO
+    br.com.ruralmanager: INFO

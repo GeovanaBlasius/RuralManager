@@ -1,0 +1,17 @@
+CURSO: CIÊNCIA DA COMPUTAÇÃO
+DISCIPLINA: BANCO DE DADOS I
+PROFESSOR(A): Dra. PATRICIA BLINI ESTIVALETE
+EQUIPE:
+
+
+                               2ª AVALIAÇÃO DE BANCO DE DADOS
+                                           Implementação do BD -
+
+
+ Com base nos resultados da primeira avaliação de aprendizagem, realizar o seguinte objetivo:
+
+ 1. Criar um banco de dados no SGBD Mysql contendo todas as regras de negócio identificadas no segundo
+ momento da primeira avaliação de aprendizagem, qual seja: deve ser criado um diagrama entidade-
+ relacionamento (DER) na notação pé de galinha que represente as regras de negócio no cenário escolhido pela
+ equipe.
+

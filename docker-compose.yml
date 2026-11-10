@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    expose: ["8080"]
+    restart: unless-stopped
+  web:
+    build: ./frontend
+    ports: ["8081:80"]
+    depends_on: [api]
+    restart: unless-stopped
