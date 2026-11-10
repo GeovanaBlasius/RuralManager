@@ -27,11 +27,11 @@ export function RelatorioSafra() {
             <Metrica rotulo="Margem" valor={`${numero(r.margemPercentual, 1)}%`} tom={tomDoValor(r.margemPercentual)} />
           </div>
           <div className="aviso">
-            Custos gerais da safra (sem lavoura): <strong>{moeda(r.custoGeral)}</strong>. Eles entram no custo total e no resultado,
-            mas não são divididos entre as lavouras abaixo.
+            Custos gerais da safra (sem cultura): <strong>{moeda(r.custoGeral)}</strong>. Eles entram no custo total e no resultado,
+            mas não são divididos entre as culturas abaixo.
           </div>
 
-          <h2 className="secao">Por lavoura</h2>
+          <h2 className="secao">Por cultura</h2>
           <div className="lista">
             {r.culturas.map((c) => (
               <div key={c.culturaId} className="cartao">

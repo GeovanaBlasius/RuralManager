@@ -13,11 +13,12 @@ const PRINCIPAIS: { para: string; rotulo: string; icone: ReactNode; fim?: boolea
 
 const SECUNDARIOS: { para: string; rotulo: string; icone: ReactNode }[] = [
   { para: '/safras', rotulo: 'Safras', icone: Icones.safra },
-  { para: '/lavouras', rotulo: 'Lavouras', icone: Icones.colheita },
+  { para: '/lavouras', rotulo: 'Culturas', icone: Icones.colheita },
   { para: '/saidas', rotulo: 'Outras saídas', icone: Icones.estoque },
   { para: '/estoque', rotulo: 'Estoque', icone: Icones.estoque },
   { para: '/clientes', rotulo: 'Clientes', icone: Icones.pessoas },
   { para: '/cadastros', rotulo: 'Cadastros', icone: Icones.lista },
+  { para: '/suporte', rotulo: 'Suporte', icone: Icones.suporte },
 ];
 
 export const LINKS_SECUNDARIOS = SECUNDARIOS;

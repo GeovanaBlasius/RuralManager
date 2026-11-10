@@ -42,6 +42,10 @@ export interface ItemVenda {
 }
 export interface Venda { id: number; clienteId: number; clienteNome: string; dataCompra: string; total: number; itens: ItemVenda[] }
 export interface UsuarioConta { id: number; nome: string; email: string; perfil: string; ativo: boolean; ultimoAcesso: string | null }
+export interface Chamado {
+  id: number; titulo: string; descricao: string; status: 'ABERTO' | 'RESOLVIDO';
+  nomeUsuario: string; emailUsuario: string; criadoEm: string;
+}
 
 export interface ResumoSafra {
   safraId: number; rotulo: string; culturas: number; areaHa: number; custo: number; receita: number; lucro: number;

@@ -9,7 +9,7 @@ import { Painel } from './pages/Painel';
 import { RelatorioSafra } from './pages/RelatorioSafra';
 import { Vendas } from './pages/Vendas';
 import { CrudPagina } from './resources/CrudPagina';
-import { clientes, colheitas, culturas, gastos, safras, saidas } from './resources/definicoes';
+import { clientes, colheitas, culturas, gastos, safras, saidas, suporte } from './resources/definicoes';
 import { Layout } from './ui/Layout';
 
 export function App() {
@@ -31,6 +31,7 @@ export function App() {
         <Route path="estoque" element={<Estoque />} />
         <Route path="cadastros" element={<Cadastros />} />
         <Route path="equipe" element={<Equipe />} />
+        <Route path="suporte" element={<CrudPagina recurso={suporte} />} />
         <Route path="mais" element={<Mais />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

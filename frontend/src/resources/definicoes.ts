@@ -1,4 +1,4 @@
-import type { Cliente, Colheita, Cultura, Gasto, Item, Safra, Saida, Unidade } from '../api/types';
+import type { Chamado, Cliente, Colheita, Cultura, Gasto, Item, Safra, Saida, Unidade } from '../api/types';
 import { dataBr, formatarCpfCnpj, hojeIso, lerDecimal, moeda, numero } from '../lib/formato';
 import type { Recurso, Valores } from './tipos';
 
@@ -26,8 +26,8 @@ export const safras: Recurso<Safra> = {
 };
 
 export const culturas: Recurso<Cultura> = {
-  chave: 'culturas', titulo: 'Lavouras', singular: 'lavoura', caminho: '/api/culturas', paginado: false,
-  textoVazio: 'Nenhuma lavoura. Cadastre o que você plantou em cada safra.',
+  chave: 'culturas', titulo: 'Culturas', singular: 'cultura', caminho: '/api/culturas', paginado: false,
+  textoVazio: 'Nenhuma cultura. Cadastre o que você plantou em cada safra.',
   filtro: { fonte: 'safras', parametro: 'safraId', rotulo: 'Safra' },
   campos: [
     { nome: 'safraId', rotulo: 'Safra', tipo: 'selecao', fonte: 'safras', obrigatorio: true, travadoAoEditar: true },
@@ -53,9 +53,9 @@ export const culturas: Recurso<Cultura> = {
 export const colheitas: Recurso<Colheita> = {
   chave: 'colheitas', titulo: 'Colheitas', singular: 'colheita', caminho: '/api/colheitas', paginado: true,
   textoVazio: 'Nenhuma colheita registrada ainda.',
-  filtro: { fonte: 'culturas', parametro: 'culturaId', rotulo: 'Lavoura' },
+  filtro: { fonte: 'culturas', parametro: 'culturaId', rotulo: 'Cultura' },
   campos: [
-    { nome: 'culturaId', rotulo: 'Lavoura', tipo: 'selecao', fonte: 'culturas', obrigatorio: true, travadoAoEditar: true },
+    { nome: 'culturaId', rotulo: 'Cultura', tipo: 'selecao', fonte: 'culturas', obrigatorio: true, travadoAoEditar: true },
     { nome: 'unidadeMedidaId', rotulo: 'Unidade de medida', tipo: 'selecao', fonte: 'unidades', obrigatorio: true },
     { nome: 'quantidade', rotulo: 'Quantidade colhida', tipo: 'numero', obrigatorio: true },
     { nome: 'dataColheita', rotulo: 'Data da colheita', tipo: 'data', obrigatorio: true },
@@ -81,11 +81,11 @@ export const gastos: Recurso<Gasto> = {
   campos: [
     { nome: 'safraId', rotulo: 'Safra', tipo: 'selecao', fonte: 'safras', obrigatorio: true, travadoAoEditar: true,
       limpa: ['culturaId', 'colheitaId'] },
-    { nome: 'culturaId', rotulo: 'Lavoura', tipo: 'selecao', fonte: 'culturas', limpa: ['colheitaId'],
+    { nome: 'culturaId', rotulo: 'Cultura', tipo: 'selecao', fonte: 'culturas', limpa: ['colheitaId'],
       dica: 'Deixe vazio para custo geral da safra (diesel, salário, arrendamento).',
       filtrar: (o, v) => !!v.safraId && o.dados?.safraId === v.safraId },
     { nome: 'colheitaId', rotulo: 'Colheita', tipo: 'selecao', fonte: 'colheitas',
-      dica: 'Opcional. Escolha a lavoura primeiro.',
+      dica: 'Opcional. Escolha a cultura primeiro.',
       filtrar: (o, v) => !!v.culturaId && o.dados?.culturaId === v.culturaId },
     { nome: 'categoriaGastoId', rotulo: 'Categoria', tipo: 'selecao', fonte: 'categorias', obrigatorio: true },
     { nome: 'descricao', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true, maxLength: 160 },
@@ -147,6 +147,24 @@ export const clientes: Recurso<Cliente> = {
   paraPayload: (v) => ({
     nome: v.nome, cpfCnpj: v.cpfCnpj, telefone: vazioParaNulo(v.telefone ?? ''), endereco: vazioParaNulo(v.endereco ?? ''),
   }),
+};
+
+export const suporte: Recurso<Chamado> = {
+  chave: 'suporte', titulo: 'Suporte', singular: 'chamado', caminho: '/api/suporte', paginado: false,
+  textoVazio: 'Nenhum chamado ainda. Relate um problema para a gente melhorar o sistema.',
+  campos: [
+    { nome: 'titulo', rotulo: 'Título', tipo: 'texto', obrigatorio: true, maxLength: 120,
+      dica: 'Resuma o problema em poucas palavras.' },
+    { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea', obrigatorio: true, maxLength: 2000,
+      dica: 'Conte o que você esperava que acontecesse e o que aconteceu de errado.' },
+  ],
+  linha: (c) => ({
+    titulo: c.titulo,
+    subtitulo: `${c.status === 'RESOLVIDO' ? 'Resolvido' : 'Aberto'} · ${dataBr(c.criadoEm)}`,
+    detalhes: [c.descricao],
+  }),
+  paraFormulario: (c): Valores => ({ titulo: c?.titulo ?? '', descricao: c?.descricao ?? '' }),
+  paraPayload: (v) => ({ titulo: v.titulo, descricao: v.descricao }),
 };
 
 // ---------------------- catalogos compartilhados ----------------------

@@ -6,3 +6,5 @@ dist/
 *.iml
 .vscode/
 *.log
+.run_log*.txt
+.compile_log*.txt

@@ -36,7 +36,7 @@ export function Entrar() {
           <img src="/icon-192.png" alt="" />
           <div>
             <h1>RuralManager</h1>
-            <p style={{ color: 'var(--texto-suave)' }}>Safras, custos e vendas da sua lavoura.</p>
+            <p style={{ color: 'var(--texto-suave)' }}>Safras, custos e vendas da sua cultura.</p>
           </div>
         </div>
         <form className="cartao" onSubmit={enviar}>

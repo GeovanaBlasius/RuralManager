@@ -43,7 +43,7 @@ export function Painel() {
                 <div className="corpo">
                   <div className="titulo">Safra {s.rotulo}</div>
                   <div className="detalhes">
-                    <span>{s.culturas} lavoura(s)</span><span>{numero(s.areaHa)} ha</span>
+                    <span>{s.culturas} cultura(s)</span><span>{numero(s.areaHa)} ha</span>
                     <span>Custo {moeda(s.custo)}</span><span>Receita {moeda(s.receita)}</span>
                   </div>
                 </div>
