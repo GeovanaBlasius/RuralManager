@@ -1,37 +1,21 @@
 :root {
-  --verde: #2f6b3a;
-  --verde-escuro: #1f4a28;
-  --verde-claro: #e3efdc;
+  --verde: #22c55e;
+  --verde-escuro: #4ade80;
+  --verde-claro: rgba(34, 197, 94, 0.14);
+  --verde-texto: #0f1a11;
   --terra: #8a5a2b;
-  --fundo: #f4f6f1;
-  --superficie: #ffffff;
-  --borda: #dfe5d8;
-  --texto: #1d2a1f;
-  --texto-suave: #5b6b5e;
-  --perigo: #b3261e;
-  --perigo-fundo: #fbeae8;
-  --aviso-fundo: #fff4d6;
-  --positivo: #1f7a3a;
-  --raio: 14px;
-  --sombra: 0 1px 2px rgba(20, 40, 20, 0.06), 0 4px 14px rgba(20, 40, 20, 0.05);
-  color-scheme: light dark;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --verde: #6fbf7d;
-    --verde-escuro: #8fd49b;
-    --verde-claro: #1f3524;
-    --fundo: #121712;
-    --superficie: #1a211b;
-    --borda: #2b352c;
-    --texto: #e7efe8;
-    --texto-suave: #9bab9e;
-    --perigo: #ff8a80;
-    --perigo-fundo: #3a1f1d;
-    --aviso-fundo: #3a3217;
-    --positivo: #7fd493;
-    --sombra: none;
-  }
+  --fundo: #0a0d0a;
+  --superficie: #141814;
+  --borda: rgba(255, 255, 255, 0.08);
+  --texto: #f3f5f2;
+  --texto-suave: #8b968c;
+  --perigo: #ff6b6b;
+  --perigo-fundo: rgba(255, 107, 107, 0.12);
+  --aviso-fundo: rgba(250, 204, 21, 0.12);
+  --positivo: #4ade80;
+  --raio: 18px;
+  --sombra: none;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
@@ -57,11 +41,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; gap: 12px;
   padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
-  background: var(--verde); color: #fff;
+  background: var(--verde); color: var(--verde-texto);
 }
 .topo h1 { font-size: 1.1rem; flex: 1; }
 .topo .marca { font-weight: 700; letter-spacing: 0.2px; }
-.topo button { background: transparent; border: 0; color: #fff; padding: 8px; border-radius: 10px; }
+.topo button { background: transparent; border: 0; color: var(--verde-texto); padding: 8px; border-radius: 10px; }
 .conteudo { flex: 1; width: 100%; max-width: 760px; margin: 0 auto; padding: 16px 16px 96px; }
 
 .nav-inferior {
@@ -120,24 +104,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 46px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent;
-  background: var(--verde); color: #fff; font-weight: 600; cursor: pointer; text-decoration: none;
+  min-height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid transparent;
+  background: var(--verde); color: var(--verde-texto); font-weight: 600; cursor: pointer; text-decoration: none;
 }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn.secundario { background: transparent; color: var(--verde); border-color: var(--verde); }
-.btn.perigo { background: transparent; color: var(--perigo); border-color: var(--perigo); }
+.btn.secundario { background: transparent; color: var(--verde); border-color: var(--borda); }
+.btn.perigo { background: transparent; color: var(--perigo); border-color: var(--borda); }
 .btn.cheio { width: 100%; }
-.btn.pequeno { min-height: 36px; padding: 0 12px; font-size: 0.9rem; }
-@media (prefers-color-scheme: dark) { .btn { color: #0f1a11; } .btn.secundario, .btn.perigo { color: var(--verde); } .btn.perigo { color: var(--perigo); } }
+.btn.pequeno { min-height: 36px; padding: 0 14px; font-size: 0.9rem; }
 
 .campo { display: grid; gap: 6px; margin-bottom: 14px; }
 .campo label { font-weight: 600; font-size: 0.92rem; }
 .campo .dica { color: var(--texto-suave); font-size: 0.82rem; }
 .campo .erro { color: var(--perigo); font-size: 0.85rem; }
 .campo input, .campo select, .campo textarea {
-  width: 100%; min-height: 46px; padding: 10px 12px; border-radius: 12px;
-  border: 1px solid var(--borda); background: var(--superficie);
+  width: 100%; min-height: 46px; padding: 10px 16px; border-radius: 999px;
+  border: 1px solid var(--borda); background: var(--superficie); color: var(--texto);
 }
+.campo textarea { border-radius: 16px; padding: 12px 16px; }
 .campo input:focus, .campo select:focus, .campo textarea:focus { outline: 2px solid var(--verde); outline-offset: 1px; }
 .campo.invalido input, .campo.invalido select { border-color: var(--perigo); }
 
@@ -166,10 +150,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
 .atalhos a {
   display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 6px; text-align: center;
-  background: var(--verde); color: #fff; border-radius: var(--raio); text-decoration: none; font-weight: 600; font-size: 0.88rem;
+  background: var(--verde); color: var(--verde-texto); border-radius: var(--raio); text-decoration: none; font-weight: 600; font-size: 0.88rem;
 }
 .atalhos a svg { width: 26px; height: 26px; }
-@media (prefers-color-scheme: dark) { .atalhos a { color: #0f1a11; } }
 
 .barra { height: 8px; border-radius: 99px; background: var(--borda); overflow: hidden; margin-top: 6px; }
 .barra > span { display: block; height: 100%; background: var(--verde); }
@@ -178,8 +161,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .secao { margin: 22px 0 10px; }
 .abas { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 2px; }
 .abas button { flex: none; min-height: 38px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--borda); background: var(--superficie); cursor: pointer; }
-.abas button.ativa { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; }
-@media (prefers-color-scheme: dark) { .abas button.ativa { color: #0f1a11; } }
+.abas button.ativa { background: var(--verde); border-color: var(--verde); color: var(--verde-texto); font-weight: 600; }
 .paginacao { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; color: var(--texto-suave); font-size: 0.9rem; }
 .linha-item-venda { border: 1px dashed var(--borda); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
 

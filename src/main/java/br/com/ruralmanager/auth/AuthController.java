@@ -34,6 +34,18 @@ public class AuthController {
         return servico.entrar(req);
     }
 
+    @PostMapping("/esqueci-senha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void esqueciSenha(@Valid @RequestBody EsqueciSenhaRequest req) {
+        servico.esqueciSenha(req);
+    }
+
+    @PostMapping("/redefinir-senha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void redefinirSenha(@Valid @RequestBody RedefinirSenhaRequest req) {
+        servico.redefinirSenha(req);
+    }
+
     /** Dados do usuario do token atual. Exige autenticacao, apesar de ficar sob /api/auth. */
     @GetMapping("/eu")
     public UsuarioResumo eu() {

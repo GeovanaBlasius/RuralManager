@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth';
+import { AdminSuporte } from './pages/AdminSuporte';
 import { Cadastros } from './pages/Cadastros';
 import { Entrar } from './pages/Entrar';
 import { Equipe } from './pages/Equipe';
@@ -15,11 +16,13 @@ import { Layout } from './ui/Layout';
 export function App() {
   const { sessao } = useAuth();
   if (!sessao) return <Entrar />;
+  const ehAdmin = sessao.usuario.perfil === 'ADMIN';
 
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Painel />} />
+        <Route index element={ehAdmin ? <AdminSuporte /> : <Painel />} />
+        <Route path="admin/suporte" element={<AdminSuporte />} />
         <Route path="safras" element={<CrudPagina recurso={safras} />} />
         <Route path="safras/:id/relatorio" element={<RelatorioSafra />} />
         <Route path="lavouras" element={<CrudPagina recurso={culturas} />} />

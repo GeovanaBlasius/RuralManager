@@ -1,26 +1,48 @@
 import { useState, type FormEvent } from 'react';
-import { ApiError } from '../api/client';
+import { api, ApiError } from '../api/client';
 import { useAuth } from '../auth';
 import { CampoForm, MensagemErro } from '../ui/componentes';
 
+type Modo = 'entrar' | 'cadastro' | 'esqueci' | 'redefinir';
+
 export function Entrar() {
   const { entrar, cadastrar } = useAuth();
-  const [modo, setModo] = useState<'entrar' | 'cadastro'>('entrar');
-  const [v, setV] = useState({ nome: '', cpf: '', telefone: '', email: '', senha: '' });
+  const [modo, setModo] = useState<Modo>('entrar');
+  const [v, setV] = useState({ nome: '', cpf: '', telefone: '', email: '', senha: '', codigo: '', novaSenha: '' });
   const [erro, setErro] = useState<unknown>(null);
+  const [mensagem, setMensagem] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [campos, setCampos] = useState<Record<string, string>>({});
 
   const muda = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((x) => ({ ...x, [k]: e.target.value }));
 
+  function trocarModo(novo: Modo) {
+    setModo(novo);
+    setErro(null);
+    setMensagem(null);
+    setCampos({});
+  }
+
   async function enviar(e: FormEvent) {
     e.preventDefault();
     setErro(null);
+    setMensagem(null);
     setCampos({});
     setEnviando(true);
     try {
-      if (modo === 'entrar') await entrar(v.email, v.senha);
-      else await cadastrar(v);
+      if (modo === 'entrar') {
+        await entrar(v.email, v.senha);
+      } else if (modo === 'cadastro') {
+        await cadastrar(v);
+      } else if (modo === 'esqueci') {
+        await api.post('/api/auth/esqueci-senha', { email: v.email });
+        setModo('redefinir');
+        setMensagem('Se esse e-mail estiver cadastrado, enviamos um código de 6 dígitos. Ele vale por 15 minutos.');
+      } else {
+        await api.post('/api/auth/redefinir-senha', { email: v.email, codigo: v.codigo, novaSenha: v.novaSenha });
+        trocarModo('entrar');
+        setMensagem('Senha redefinida. Entre com a nova senha.');
+      }
     } catch (err) {
       setErro(err);
       if (err instanceof ApiError) setCampos(err.campos);
@@ -40,7 +62,10 @@ export function Entrar() {
           </div>
         </div>
         <form className="cartao" onSubmit={enviar}>
-          <h2 style={{ marginBottom: 14 }}>{modo === 'entrar' ? 'Entrar' : 'Criar conta'}</h2>
+          <h2 style={{ marginBottom: 14 }}>
+            {modo === 'entrar' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta'
+              : modo === 'esqueci' ? 'Recuperar senha' : 'Redefinir senha'}
+          </h2>
           {modo === 'cadastro' && (
             <>
               <CampoForm id="nome" rotulo="Seu nome" erro={campos.nome}>
@@ -57,19 +82,45 @@ export function Entrar() {
           <CampoForm id="email" rotulo="E-mail" erro={campos.email}>
             <input id="email" type="email" value={v.email} onChange={muda('email')} autoComplete="email" required />
           </CampoForm>
-          <CampoForm id="senha" rotulo="Senha" erro={campos.senha} dica={modo === 'cadastro' ? 'Mínimo de 8 caracteres.' : undefined}>
-            <input id="senha" type="password" value={v.senha} onChange={muda('senha')}
-              autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} required />
-          </CampoForm>
+          {(modo === 'entrar' || modo === 'cadastro') && (
+            <CampoForm id="senha" rotulo="Senha" erro={campos.senha} dica={modo === 'cadastro' ? 'Mínimo de 8 caracteres.' : undefined}>
+              <input id="senha" type="password" value={v.senha} onChange={muda('senha')}
+                autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} required />
+            </CampoForm>
+          )}
+          {modo === 'redefinir' && (
+            <>
+              <CampoForm id="codigo" rotulo="Código recebido por e-mail" erro={campos.codigo}>
+                <input id="codigo" inputMode="numeric" value={v.codigo} onChange={muda('codigo')} maxLength={6} required />
+              </CampoForm>
+              <CampoForm id="novaSenha" rotulo="Nova senha" erro={campos.novaSenha} dica="Mínimo de 8 caracteres.">
+                <input id="novaSenha" type="password" value={v.novaSenha} onChange={muda('novaSenha')}
+                  autoComplete="new-password" required />
+              </CampoForm>
+            </>
+          )}
+          {mensagem && <p style={{ color: 'var(--verde)', marginBottom: 10 }}>{mensagem}</p>}
           <MensagemErro erro={erro} />
           <button className="btn cheio" type="submit" disabled={enviando}>
-            {enviando ? 'Aguarde…' : modo === 'entrar' ? 'Entrar' : 'Criar conta'}
+            {enviando ? 'Aguarde…' : modo === 'entrar' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta'
+              : modo === 'esqueci' ? 'Enviar código' : 'Redefinir senha'}
           </button>
         </form>
         <div className="trocar">
-          <button type="button" onClick={() => { setModo(modo === 'entrar' ? 'cadastro' : 'entrar'); setErro(null); setCampos({}); }}>
-            {modo === 'entrar' ? 'Primeiro acesso? Criar conta' : 'Já tenho conta'}
-          </button>
+          {modo === 'entrar' && (
+            <>
+              <button type="button" onClick={() => trocarModo('cadastro')}>Primeiro acesso? Criar conta</button>
+              <button type="button" onClick={() => trocarModo('esqueci')}>Esqueceu a senha?</button>
+            </>
+          )}
+          {modo === 'cadastro' && <button type="button" onClick={() => trocarModo('entrar')}>Já tenho conta</button>}
+          {modo === 'esqueci' && <button type="button" onClick={() => trocarModo('entrar')}>Já lembrei, voltar a entrar</button>}
+          {modo === 'redefinir' && (
+            <>
+              <button type="button" onClick={() => trocarModo('esqueci')}>Pedir um novo código</button>
+              <button type="button" onClick={() => trocarModo('entrar')}>Voltar a entrar</button>
+            </>
+          )}
         </div>
       </div>
     </div>

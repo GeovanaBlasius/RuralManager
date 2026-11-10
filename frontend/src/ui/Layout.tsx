@@ -23,11 +23,19 @@ const SECUNDARIOS: { para: string; rotulo: string; icone: ReactNode }[] = [
 
 export const LINKS_SECUNDARIOS = SECUNDARIOS;
 
+const ADMIN_LINKS: { para: string; rotulo: string; icone: ReactNode; fim?: boolean }[] = [
+  { para: '/', rotulo: 'Painel de suporte', icone: Icones.suporte, fim: true },
+  { para: '/suporte', rotulo: 'Meus chamados', icone: Icones.suporte },
+];
+
 export function Layout() {
   const { sessao, sair } = useAuth();
   const { pathname } = useLocation();
   const ehProdutor = sessao?.usuario.perfil === 'PRODUTOR';
-  const titulo = [...PRINCIPAIS, ...SECUNDARIOS].find((l) => (l.para === '/' ? pathname === '/' : pathname.startsWith(l.para)))?.rotulo ?? 'RuralManager';
+  const ehAdmin = sessao?.usuario.perfil === 'ADMIN';
+  const principais = ehAdmin ? ADMIN_LINKS : PRINCIPAIS;
+  const secundarios = ehAdmin ? [] : SECUNDARIOS;
+  const titulo = [...principais, ...secundarios].find((l) => (l.para === '/' ? pathname === '/' : pathname.startsWith(l.para)))?.rotulo ?? 'RuralManager';
 
   const classe = ({ isActive }: { isActive: boolean }) => (isActive ? 'ativo' : undefined);
 
@@ -35,7 +43,7 @@ export function Layout() {
     <div className="app">
       <nav className="nav-lateral" aria-label="Principal">
         <div className="marca">RuralManager</div>
-        {[...PRINCIPAIS.filter((l) => l.para !== '/mais'), ...SECUNDARIOS].map((l) => (
+        {[...principais.filter((l) => l.para !== '/mais'), ...secundarios].map((l) => (
           <NavLink key={l.para} to={l.para} end={l.para === '/'} className={classe}>{l.icone}{l.rotulo}</NavLink>
         ))}
         {ehProdutor && <NavLink to="/equipe" className={classe}>{Icones.pessoas}Equipe</NavLink>}
@@ -51,7 +59,7 @@ export function Layout() {
       </div>
 
       <nav className="nav-inferior" aria-label="Principal">
-        {PRINCIPAIS.map((l) => (
+        {(ehAdmin ? ADMIN_LINKS : PRINCIPAIS).map((l) => (
           <NavLink key={l.para} to={l.para} end={l.fim} className={classe}>{l.icone}{l.rotulo}</NavLink>
         ))}
       </nav>

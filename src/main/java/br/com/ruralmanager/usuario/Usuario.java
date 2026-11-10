@@ -79,6 +79,13 @@ public class Usuario extends EntidadeAuditavel {
     @Column(name = "ultimo_acesso")
     private LocalDateTime ultimoAcesso;
 
+    /** Hash (BCrypt) do codigo de recuperacao de senha enviado por e-mail. Nulo quando nao ha pedido pendente. */
+    @Column(name = "codigo_recuperacao_hash", length = 100)
+    private String codigoRecuperacaoHash;
+
+    @Column(name = "codigo_recuperacao_expira")
+    private LocalDateTime codigoRecuperacaoExpira;
+
     /** Construtor exigido pelo JPA. */
     protected Usuario() {
     }
@@ -178,6 +185,24 @@ public class Usuario extends EntidadeAuditavel {
 
     public LocalDateTime getUltimoAcesso() {
         return ultimoAcesso;
+    }
+
+    public String getCodigoRecuperacaoHash() {
+        return codigoRecuperacaoHash;
+    }
+
+    public LocalDateTime getCodigoRecuperacaoExpira() {
+        return codigoRecuperacaoExpira;
+    }
+
+    public void definirCodigoRecuperacao(String hash, LocalDateTime expira) {
+        this.codigoRecuperacaoHash = hash;
+        this.codigoRecuperacaoExpira = expira;
+    }
+
+    public void limparCodigoRecuperacao() {
+        this.codigoRecuperacaoHash = null;
+        this.codigoRecuperacaoExpira = null;
     }
 
     @Override

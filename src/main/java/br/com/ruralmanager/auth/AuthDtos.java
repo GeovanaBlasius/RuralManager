@@ -34,4 +34,16 @@ public final class AuthDtos {
 
     public record AuthResponse(String token, String tipo, long expiraEmSegundos, UsuarioResumo usuario) {
     }
+
+    public record EsqueciSenhaRequest(
+            @NotBlank(message = "Informe o e-mail") @Email(message = "E-mail invalido") String email) {
+    }
+
+    public record RedefinirSenhaRequest(
+            @NotBlank(message = "Informe o e-mail") @Email(message = "E-mail invalido") String email,
+            @NotBlank(message = "Informe o codigo recebido por e-mail")
+            @Size(min = 6, max = 6, message = "O codigo tem 6 digitos") String codigo,
+            @NotBlank(message = "Informe a nova senha")
+            @Size(min = 8, max = 72, message = "A senha deve ter entre 8 e 72 caracteres") String novaSenha) {
+    }
 }

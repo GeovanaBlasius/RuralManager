@@ -51,6 +51,9 @@ rm:
     jwt-secret: ${RM_JWT_SECRET}        # >= 32 caracteres; gere com: openssl rand -base64 48
     jwt-expiracao-minutos: ${RM_JWT_MINUTOS:480}
     cors-origens: ${RM_CORS_ORIGENS:http://localhost:5173}
+  email:
+    resend-api-key: ${RM_RESEND_API_KEY:}   # resend.com > API Keys. Em branco, o e-mail so vai pro log.
+    remetente: ${RM_EMAIL_REMETENTE:onboarding@resend.dev}
 
 management:
   endpoints:
