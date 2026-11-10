@@ -37,13 +37,13 @@ public class SaidaServico {
     }
 
     private Saida buscar(Long id) {
-        return saidas.findByIdAndColheitaCulturaSafraProdutor_Id(id, contexto.produtorId())
+        return saidas.findByIdAndColheita_Cultura_Safra_Produtor_Id(id, contexto.produtorId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Saida"));
     }
 
     @Transactional(readOnly = true)
     public Pagina<SaidaResponse> listar(Pageable pageable) {
-        return Pagina.de(saidas.findByColheitaCulturaSafraProdutor_IdOrderByDataSaidaDesc(
+        return Pagina.de(saidas.findByColheita_Cultura_Safra_Produtor_IdOrderByDataSaidaDesc(
                 contexto.produtorId(), pageable), SaidaResponse::de);
     }
 

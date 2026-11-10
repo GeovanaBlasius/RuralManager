@@ -12,9 +12,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface SaidaRepository extends JpaRepository<Saida, Long> {
 
-    Page<Saida> findByColheitaCulturaSafraProdutor_IdOrderByDataSaidaDesc(Long produtorId, Pageable pageable);
+    Page<Saida> findByColheita_Cultura_Safra_Produtor_IdOrderByDataSaidaDesc(Long produtorId, Pageable pageable);
 
-    Optional<Saida> findByIdAndColheitaCulturaSafraProdutor_Id(Long id, Long produtorId);
+    Optional<Saida> findByIdAndColheita_Cultura_Safra_Produtor_Id(Long id, Long produtorId);
 
     boolean existsByColheitaId(Long colheitaId);
 

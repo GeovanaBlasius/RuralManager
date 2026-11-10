@@ -41,7 +41,7 @@ public class GastoServico {
     }
 
     private Gasto buscar(Long id) {
-        return gastos.findByIdAndSafraProdutor_Id(id, contexto.produtorId())
+        return gastos.findByIdAndSafra_Produtor_Id(id, contexto.produtorId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Gasto"));
     }
 
@@ -49,8 +49,8 @@ public class GastoServico {
     public Pagina<GastoResponse> listar(Long safraId, Pageable pageable) {
         Long pid = contexto.produtorId();
         var pagina = safraId == null
-                ? gastos.findBySafraProdutor_IdOrderByDataGastoDesc(pid, pageable)
-                : gastos.findBySafraIdAndSafraProdutor_IdOrderByDataGastoDesc(safraId, pid, pageable);
+                ? gastos.findBySafra_Produtor_IdOrderByDataGastoDesc(pid, pageable)
+                : gastos.findBySafraIdAndSafra_Produtor_IdOrderByDataGastoDesc(safraId, pid, pageable);
         return Pagina.de(pagina, GastoResponse::de);
     }
 

@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CulturaRepository extends JpaRepository<Cultura, Long> {
 
-    List<Cultura> findBySafraIdAndSafraProdutor_IdOrderByDataPlantioDesc(Long safraId, Long produtorId);
+    List<Cultura> findBySafraIdAndSafra_Produtor_IdOrderByDataPlantioDesc(Long safraId, Long produtorId);
 
-    List<Cultura> findBySafraProdutor_IdOrderByDataPlantioDesc(Long produtorId);
+    List<Cultura> findBySafra_Produtor_IdOrderByDataPlantioDesc(Long produtorId);
 
-    Optional<Cultura> findByIdAndSafraProdutor_Id(Long id, Long produtorId);
+    Optional<Cultura> findByIdAndSafra_Produtor_Id(Long id, Long produtorId);
 
     boolean existsBySafraId(Long safraId);
 

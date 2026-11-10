@@ -41,7 +41,7 @@ public class CulturaServico {
 
     /** Busca a lavoura garantindo que e do produtor logado; reutilizado pelos outros servicos. */
     public Cultura buscar(Long id) {
-        return culturas.findByIdAndSafraProdutor_Id(id, contexto.produtorId())
+        return culturas.findByIdAndSafra_Produtor_Id(id, contexto.produtorId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Lavoura"));
     }
 
@@ -49,8 +49,8 @@ public class CulturaServico {
     public List<CulturaResponse> listar(Long safraId) {
         Long pid = contexto.produtorId();
         List<Cultura> lista = safraId == null
-                ? culturas.findBySafraProdutor_IdOrderByDataPlantioDesc(pid)
-                : culturas.findBySafraIdAndSafraProdutor_IdOrderByDataPlantioDesc(safraId, pid);
+                ? culturas.findBySafra_Produtor_IdOrderByDataPlantioDesc(pid)
+                : culturas.findBySafraIdAndSafra_Produtor_IdOrderByDataPlantioDesc(safraId, pid);
         return lista.stream().map(CulturaResponse::de).toList();
     }
 

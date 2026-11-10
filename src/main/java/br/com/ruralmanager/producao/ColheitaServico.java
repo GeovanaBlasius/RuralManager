@@ -47,7 +47,7 @@ public class ColheitaServico {
 
     /** Busca a colheita garantindo que e do produtor logado; reutilizado pelos outros servicos. */
     public Colheita buscar(Long id) {
-        return colheitas.findByIdAndCulturaSafraProdutor_Id(id, contexto.produtorId())
+        return colheitas.findByIdAndCultura_Safra_Produtor_Id(id, contexto.produtorId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Colheita"));
     }
 
@@ -61,8 +61,8 @@ public class ColheitaServico {
     public Pagina<ColheitaResponse> listar(Long culturaId, Pageable pageable) {
         Long pid = contexto.produtorId();
         Page<Colheita> pagina = culturaId == null
-                ? colheitas.findByCulturaSafraProdutor_IdOrderByDataColheitaDesc(pid, pageable)
-                : colheitas.findByCulturaIdAndCulturaSafraProdutor_IdOrderByDataColheitaDesc(culturaId, pid, pageable);
+                ? colheitas.findByCultura_Safra_Produtor_IdOrderByDataColheitaDesc(pid, pageable)
+                : colheitas.findByCulturaIdAndCultura_Safra_Produtor_IdOrderByDataColheitaDesc(culturaId, pid, pageable);
         return montar(pagina);
     }
 

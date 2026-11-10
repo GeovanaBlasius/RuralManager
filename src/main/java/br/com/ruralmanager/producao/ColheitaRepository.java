@@ -12,12 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface ColheitaRepository extends JpaRepository<Colheita, Long> {
 
-    Page<Colheita> findByCulturaSafraProdutor_IdOrderByDataColheitaDesc(Long produtorId, Pageable pageable);
+    Page<Colheita> findByCultura_Safra_Produtor_IdOrderByDataColheitaDesc(Long produtorId, Pageable pageable);
 
-    Page<Colheita> findByCulturaIdAndCulturaSafraProdutor_IdOrderByDataColheitaDesc(
+    Page<Colheita> findByCulturaIdAndCultura_Safra_Produtor_IdOrderByDataColheitaDesc(
             Long culturaId, Long produtorId, Pageable pageable);
 
-    Optional<Colheita> findByIdAndCulturaSafraProdutor_Id(Long id, Long produtorId);
+    Optional<Colheita> findByIdAndCultura_Safra_Produtor_Id(Long id, Long produtorId);
 
     boolean existsByCulturaId(Long culturaId);
 
