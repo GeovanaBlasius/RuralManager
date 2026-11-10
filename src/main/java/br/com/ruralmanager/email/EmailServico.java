@@ -27,7 +27,7 @@ public class EmailServico {
 
     public EmailServico(PropriedadesEmail props) {
         this.remetente = props.remetente() == null || props.remetente().isBlank()
-                ? "onboarding@resend.dev" : props.remetente();
+                ? "RuralManager <onboarding@resend.dev>" : props.remetente();
         this.habilitado = props.resendApiKey() != null && !props.resendApiKey().isBlank();
         this.restClient = RestClient.builder()
                 .baseUrl("https://api.resend.com")
