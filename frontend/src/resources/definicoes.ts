@@ -30,7 +30,8 @@ export const culturas: Recurso<Cultura> = {
   textoVazio: 'Nenhuma cultura. Cadastre o que você plantou em cada safra.',
   filtro: { fonte: 'safras', parametro: 'safraId', rotulo: 'Safra' },
   campos: [
-    { nome: 'safraId', rotulo: 'Safra', tipo: 'selecao', fonte: 'safras', obrigatorio: true, travadoAoEditar: true },
+    { nome: 'safraId', rotulo: 'Safra', tipo: 'selecao', fonte: 'safras', obrigatorio: true, travadoAoEditar: true,
+      criarRecurso: safras },
     { nome: 'produtoId', rotulo: 'Produto', tipo: 'selecao', fonte: 'produtos', obrigatorio: true,
       dica: 'Não achou? Cadastre o produto em Mais > Cadastros.' },
     { nome: 'variedade', rotulo: 'Variedade', tipo: 'texto', obrigatorio: true, maxLength: 60 },
@@ -55,7 +56,8 @@ export const colheitas: Recurso<Colheita> = {
   textoVazio: 'Nenhuma colheita registrada ainda.',
   filtro: { fonte: 'culturas', parametro: 'culturaId', rotulo: 'Cultura' },
   campos: [
-    { nome: 'culturaId', rotulo: 'Cultura', tipo: 'selecao', fonte: 'culturas', obrigatorio: true, travadoAoEditar: true },
+    { nome: 'culturaId', rotulo: 'Cultura', tipo: 'selecao', fonte: 'culturas', obrigatorio: true, travadoAoEditar: true,
+      criarRecurso: culturas },
     { nome: 'unidadeMedidaId', rotulo: 'Unidade de medida', tipo: 'selecao', fonte: 'unidades', obrigatorio: true },
     { nome: 'quantidade', rotulo: 'Quantidade colhida', tipo: 'numero', obrigatorio: true },
     { nome: 'dataColheita', rotulo: 'Data da colheita', tipo: 'data', obrigatorio: true },
@@ -80,10 +82,10 @@ export const gastos: Recurso<Gasto> = {
   filtro: { fonte: 'safras', parametro: 'safraId', rotulo: 'Safra' },
   campos: [
     { nome: 'safraId', rotulo: 'Safra', tipo: 'selecao', fonte: 'safras', obrigatorio: true, travadoAoEditar: true,
-      limpa: ['culturaId', 'colheitaId'] },
+      limpa: ['culturaId', 'colheitaId'], criarRecurso: safras },
     { nome: 'culturaId', rotulo: 'Cultura', tipo: 'selecao', fonte: 'culturas', limpa: ['colheitaId'],
       dica: 'Deixe vazio para custo geral da safra (diesel, salário, arrendamento).',
-      filtrar: (o, v) => !!v.safraId && o.dados?.safraId === v.safraId },
+      filtrar: (o, v) => !!v.safraId && o.dados?.safraId === v.safraId, criarRecurso: culturas },
     { nome: 'colheitaId', rotulo: 'Colheita', tipo: 'selecao', fonte: 'colheitas',
       dica: 'Opcional. Escolha a cultura primeiro.',
       filtrar: (o, v) => !!v.culturaId && o.dados?.culturaId === v.culturaId },
@@ -111,7 +113,8 @@ export const saidas: Recurso<Saida> = {
   chave: 'saidas', titulo: 'Outras saídas', singular: 'saída', caminho: '/api/saidas', paginado: true,
   textoVazio: 'Nenhuma saída. Registre aqui o que não foi vendido: consumo, semente guardada, ração, perda, doação.',
   campos: [
-    { nome: 'colheitaId', rotulo: 'Colheita', tipo: 'selecao', fonte: 'colheitas', obrigatorio: true, travadoAoEditar: true },
+    { nome: 'colheitaId', rotulo: 'Colheita', tipo: 'selecao', fonte: 'colheitas', obrigatorio: true, travadoAoEditar: true,
+      criarRecurso: colheitas },
     { nome: 'destinoId', rotulo: 'Destino', tipo: 'selecao', fonte: 'destinos', obrigatorio: true },
     { nome: 'quantidade', rotulo: 'Quantidade', tipo: 'numero', obrigatorio: true, dica: 'Na mesma unidade da colheita.' },
     { nome: 'dataSaida', rotulo: 'Data', tipo: 'data', obrigatorio: true },

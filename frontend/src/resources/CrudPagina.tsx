@@ -118,12 +118,18 @@ interface FormProps<T extends { id: number }> {
   recurso: Recurso<T>;
   registro?: T;
   aoFechar: () => void;
+  /** Preenche campos antes de abrir (ex.: a safra ja escolhida no formulario pai). */
+  valoresIniciais?: Valores;
+  /** So quando criado (nao editando): devolve o id do item novo, para auto-selecionar no formulario pai. */
+  aoCriar?: (id: number) => void;
+  /** Quando aberto de dentro de outro formulario (criacao rapida): nao usa <form>, HTML nao permite form aninhado. */
+  aninhado?: boolean;
 }
 
-function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFechar }: FormProps<T>) {
+function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFechar, valoresIniciais, aoCriar, aninhado }: FormProps<T>) {
   const qc = useQueryClient();
   const editando = registro !== undefined;
-  const [valores, setValores] = useState<Valores>(() => recurso.paraFormulario(registro));
+  const [valores, setValores] = useState<Valores>(() => ({ ...recurso.paraFormulario(registro), ...valoresIniciais }));
   const [errosLocais, setErrosLocais] = useState<Record<string, string>>({});
   const [confirmando, setConfirmando] = useState(false);
 
@@ -131,9 +137,10 @@ function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFech
     mutationFn: () =>
       editando
         ? api.put(`${recurso.caminho}/${registro.id}`, recurso.paraPayload(valores))
-        : api.post(recurso.caminho, recurso.paraPayload(valores)),
-    onSuccess: async () => {
+        : api.post<{ id: number }>(recurso.caminho, recurso.paraPayload(valores)),
+    onSuccess: async (resultado) => {
       await qc.invalidateQueries(); // estoque e relatorios dependem de quase tudo
+      if (!editando && aoCriar) aoCriar((resultado as { id: number }).id);
       aoFechar();
     },
   });
@@ -156,8 +163,8 @@ function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFech
     setErrosLocais((e) => ({ ...e, [nome]: '' }));
   }
 
-  function enviar(e: FormEvent) {
-    e.preventDefault();
+  function enviar(e?: FormEvent) {
+    e?.preventDefault();
     const faltando: Record<string, string> = {};
     for (const c of recurso.campos) {
       if (c.obrigatorio && !(valores[c.nome] ?? '').trim()) faltando[c.nome] = 'Campo obrigatório';
@@ -169,36 +176,45 @@ function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFech
   const errosServidor = salvar.error instanceof ApiError ? salvar.error.campos : {};
   const erro = salvar.error ?? excluir.error;
 
+  const corpo = (
+    <>
+      {recurso.campos.map((c) => (
+        <CampoRecurso
+          key={c.nome}
+          campo={c}
+          valores={valores}
+          editando={editando}
+          erro={errosLocais[c.nome] || errosServidor[c.nome]}
+          aoMudar={mudar}
+        />
+      ))}
+      <MensagemErro erro={erro} />
+      <div className="acoes">
+        <button
+          className="btn cheio"
+          type={aninhado ? 'button' : 'submit'}
+          disabled={salvar.isPending}
+          onClick={aninhado ? () => enviar() : undefined}
+        >
+          {salvar.isPending ? 'Salvando…' : 'Salvar'}
+        </button>
+        {editando && !confirmando && (
+          <button className="btn perigo cheio" type="button" onClick={() => setConfirmando(true)}>
+            Excluir
+          </button>
+        )}
+        {editando && confirmando && (
+          <button className="btn perigo cheio" type="button" disabled={excluir.isPending} onClick={() => excluir.mutate()}>
+            {excluir.isPending ? 'Excluindo…' : 'Toque de novo para confirmar a exclusão'}
+          </button>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <Folha titulo={editando ? `Editar ${recurso.singular}` : `Novo(a) ${recurso.singular}`} aoFechar={aoFechar}>
-      <form onSubmit={enviar} noValidate>
-        {recurso.campos.map((c) => (
-          <CampoRecurso
-            key={c.nome}
-            campo={c}
-            valores={valores}
-            editando={editando}
-            erro={errosLocais[c.nome] || errosServidor[c.nome]}
-            aoMudar={mudar}
-          />
-        ))}
-        <MensagemErro erro={erro} />
-        <div className="acoes">
-          <button className="btn cheio" type="submit" disabled={salvar.isPending}>
-            {salvar.isPending ? 'Salvando…' : 'Salvar'}
-          </button>
-          {editando && !confirmando && (
-            <button className="btn perigo cheio" type="button" onClick={() => setConfirmando(true)}>
-              Excluir
-            </button>
-          )}
-          {editando && confirmando && (
-            <button className="btn perigo cheio" type="button" disabled={excluir.isPending} onClick={() => excluir.mutate()}>
-              {excluir.isPending ? 'Excluindo…' : 'Toque de novo para confirmar a exclusão'}
-            </button>
-          )}
-        </div>
-      </form>
+      {aninhado ? <div>{corpo}</div> : <form onSubmit={enviar} noValidate>{corpo}</form>}
     </Folha>
   );
 }
@@ -245,10 +261,41 @@ function Selecao({ id, campo, valor, valores, travado, aoMudar }: {
 }) {
   const { opcoes, carregando } = useOpcoes(campo.fonte!);
   const visiveis = campo.filtrar ? opcoes.filter((o) => campo.filtrar!(o, valores)) : opcoes;
-  return (
+  const [criando, setCriando] = useState(false);
+  const criarRecurso = campo.criarRecurso;
+
+  const select = (
     <select id={id} value={valor} disabled={travado || carregando} onChange={(e) => aoMudar(campo.nome, e.target.value)}>
       <option value="">{carregando ? 'Carregando…' : campo.obrigatorio ? 'Selecione…' : '— nenhum —'}</option>
       {visiveis.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
     </select>
+  );
+
+  if (!criarRecurso) return select;
+
+  // Pre-preenche, no formulario novo, os campos que ja existem (pelo nome) no formulario pai.
+  const preenchimento: Valores = {};
+  for (const c of criarRecurso.campos) {
+    if (valores[c.nome]) preenchimento[c.nome] = valores[c.nome];
+  }
+
+  return (
+    <>
+      <div className="selecao-com-criar">
+        {select}
+        <button type="button" className="btn secundario pequeno" onClick={() => setCriando(true)}>
+          + Novo(a)
+        </button>
+      </div>
+      {criando && (
+        <FormularioRecurso
+          recurso={criarRecurso}
+          valoresIniciais={preenchimento}
+          aninhado
+          aoFechar={() => setCriando(false)}
+          aoCriar={(novoId) => { aoMudar(campo.nome, String(novoId)); setCriando(false); }}
+        />
+      )}
+    </>
   );
 }

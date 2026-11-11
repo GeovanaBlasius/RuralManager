@@ -18,6 +18,9 @@ export interface Campo {
   travadoAoEditar?: boolean;
   /** Campos que devem ser esvaziados quando este muda (ex.: trocar a safra invalida a lavoura escolhida). */
   limpa?: string[];
+  /** Para tipo 'selecao': permite criar um item novo sem sair do formulario (ex.: "+ Nova cultura"). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- recursos de tipos diferentes (Safra, Cultura, Colheita...) precisam caber aqui
+  criarRecurso?: Recurso<any>;
 }
 
 export interface Linha {
