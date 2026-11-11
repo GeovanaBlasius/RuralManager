@@ -18,7 +18,7 @@ services:
       - key: RM_JWT_MINUTOS
         value: "480"
       - key: RM_CORS_ORIGENS
-        value: "https://ruralmanager-web.onrender.com"
+        value: "https://ruralmanager-web-w8cf.onrender.com"
       - key: RM_RESEND_API_KEY
         sync: false
       - key: RM_EMAIL_REMETENTE
@@ -38,4 +38,4 @@ services:
     plan: free
     envVars:
       - key: VITE_API_URL
-        value: "https://ruralmanager-api.onrender.com"
+        value: "https://ruralmanager-api-w8cf.onrender.com"
