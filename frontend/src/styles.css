@@ -125,6 +125,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .campo input:focus, .campo select:focus, .campo textarea:focus { outline: 2px solid var(--verde); outline-offset: 1px; }
 .campo.invalido input, .campo.invalido select { border-color: var(--perigo); }
 
+.campo-senha { position: relative; }
+.campo-senha input { padding-right: 44px; }
+.campo-senha .alternar-senha {
+  position: absolute; top: 50%; right: 4px; transform: translateY(-50%);
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; padding: 0; background: transparent; border: 0;
+  color: var(--texto-suave); cursor: pointer; border-radius: 999px;
+}
+.campo-senha .alternar-senha svg { width: 20px; height: 20px; }
+
 .aviso { padding: 12px 14px; border-radius: 12px; background: var(--aviso-fundo); margin-bottom: 14px; font-size: 0.92rem; }
 .aviso.erro { background: var(--perigo-fundo); color: var(--perigo); }
 .vazio { text-align: center; color: var(--texto-suave); padding: 36px 16px; }
@@ -171,3 +181,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .login .marca-grande img { width: 52px; height: 52px; border-radius: 14px; }
 .login .trocar { text-align: center; margin-top: 14px; }
 .login .trocar button { background: none; border: 0; color: var(--verde); font-weight: 600; cursor: pointer; padding: 6px; }
+
+.aviso-privacidade {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  background: var(--superficie); border-top: 1px solid var(--borda);
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+.aviso-privacidade p { font-size: 0.86rem; color: var(--texto-suave); max-width: 640px; margin: 0 auto 10px; }
+.aviso-privacidade-acoes { display: flex; gap: 10px; justify-content: center; }
+@media (min-width: 640px) {
+  .aviso-privacidade { display: flex; align-items: center; gap: 16px; justify-content: center; }
+  .aviso-privacidade p { margin: 0; }
+}

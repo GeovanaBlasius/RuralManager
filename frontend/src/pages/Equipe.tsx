@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { api, ApiError } from '../api/client';
 import type { UsuarioConta } from '../api/types';
 import { useAuth } from '../auth';
-import { CampoForm, Carregando, Folha, MensagemErro } from '../ui/componentes';
+import { CampoForm, CampoSenha, Carregando, Folha, MensagemErro } from '../ui/componentes';
 
 export function Equipe() {
   const { sessao } = useAuth();
@@ -65,7 +65,7 @@ function NovoOperador({ aoFechar }: { aoFechar: () => void }) {
         <CampoForm id="n" rotulo="Nome" erro={campos.nome}><input id="n" value={v.nome} onChange={muda('nome')} required /></CampoForm>
         <CampoForm id="e" rotulo="E-mail" erro={campos.email}><input id="e" type="email" value={v.email} onChange={muda('email')} required /></CampoForm>
         <CampoForm id="s" rotulo="Senha inicial" erro={campos.senha} dica="Mínimo de 8 caracteres. Combine a senha com a pessoa pessoalmente.">
-          <input id="s" type="password" value={v.senha} onChange={muda('senha')} autoComplete="new-password" required />
+          <CampoSenha id="s" value={v.senha} onChange={muda('senha')} autoComplete="new-password" />
         </CampoForm>
         <MensagemErro erro={criar.error} />
         <button className="btn cheio" type="submit" disabled={criar.isPending}>{criar.isPending ? 'Criando…' : 'Criar acesso'}</button>

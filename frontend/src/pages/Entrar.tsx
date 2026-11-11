@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../auth';
-import { CampoForm, MensagemErro } from '../ui/componentes';
+import { AvisoPrivacidade, CampoForm, CampoSenha, MensagemErro } from '../ui/componentes';
 
 type Modo = 'entrar' | 'cadastro' | 'esqueci' | 'redefinir';
 
@@ -84,8 +84,8 @@ export function Entrar() {
           </CampoForm>
           {(modo === 'entrar' || modo === 'cadastro') && (
             <CampoForm id="senha" rotulo="Senha" erro={campos.senha} dica={modo === 'cadastro' ? 'Mínimo de 8 caracteres.' : undefined}>
-              <input id="senha" type="password" value={v.senha} onChange={muda('senha')}
-                autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} required />
+              <CampoSenha id="senha" value={v.senha} onChange={muda('senha')}
+                autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} />
             </CampoForm>
           )}
           {modo === 'redefinir' && (
@@ -94,8 +94,7 @@ export function Entrar() {
                 <input id="codigo" inputMode="numeric" value={v.codigo} onChange={muda('codigo')} maxLength={6} required />
               </CampoForm>
               <CampoForm id="novaSenha" rotulo="Nova senha" erro={campos.novaSenha} dica="Mínimo de 8 caracteres.">
-                <input id="novaSenha" type="password" value={v.novaSenha} onChange={muda('novaSenha')}
-                  autoComplete="new-password" required />
+                <CampoSenha id="novaSenha" value={v.novaSenha} onChange={muda('novaSenha')} autoComplete="new-password" />
               </CampoForm>
             </>
           )}
@@ -123,6 +122,7 @@ export function Entrar() {
           )}
         </div>
       </div>
+      <AvisoPrivacidade />
     </div>
   );
 }
