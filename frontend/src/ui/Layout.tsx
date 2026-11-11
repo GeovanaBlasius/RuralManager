@@ -13,7 +13,7 @@ const PRINCIPAIS: { para: string; rotulo: string; icone: ReactNode; fim?: boolea
 
 const SECUNDARIOS: { para: string; rotulo: string; icone: ReactNode; grupo: string }[] = [
   { para: '/safras', rotulo: 'Safras', icone: Icones.safra, grupo: 'Cadastros' },
-  { para: '/lavouras', rotulo: 'Culturas', icone: Icones.colheita, grupo: 'Cadastros' },
+  { para: '/lavouras', rotulo: 'Culturas', icone: Icones.cultura, grupo: 'Cadastros' },
   { para: '/clientes', rotulo: 'Clientes', icone: Icones.pessoas, grupo: 'Cadastros' },
   { para: '/cadastros', rotulo: 'Catálogos', icone: Icones.lista, grupo: 'Cadastros' },
   { para: '/saidas', rotulo: 'Outras saídas', icone: Icones.estoque, grupo: 'Operação' },
