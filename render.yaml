@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: ruralmanager-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /actuator/health/readiness
+    envVars:
+      - key: RM_DB_URL
+        sync: false
+      - key: RM_DB_USER
+        sync: false
+      - key: RM_DB_PASSWORD
+        sync: false
+      - key: RM_JWT_SECRET
+        sync: false
+      - key: RM_JWT_MINUTOS
+        value: "480"
+      - key: RM_CORS_ORIGENS
+        value: "https://ruralmanager-web.onrender.com"
+      - key: RM_RESEND_API_KEY
+        sync: false
+      - key: RM_EMAIL_REMETENTE
+        value: "RuralManager <onboarding@resend.dev>"
+      - key: RM_ADMIN_EMAIL
+        sync: false
+      - key: RM_ADMIN_SENHA
+        sync: false
+      - key: RM_OPENAPI
+        value: "false"
+
+  - type: web
+    name: ruralmanager-web
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: "https://ruralmanager-api.onrender.com"
