@@ -132,6 +132,7 @@ export function FormularioRecurso<T extends { id: number }>({ recurso, registro,
   const [valores, setValores] = useState<Valores>(() => ({ ...recurso.paraFormulario(registro), ...valoresIniciais }));
   const [errosLocais, setErrosLocais] = useState<Record<string, string>>({});
   const [confirmando, setConfirmando] = useState(false);
+  const [tocado, setTocado] = useState(false);
 
   const salvar = useMutation({
     mutationFn: () =>
@@ -154,6 +155,7 @@ export function FormularioRecurso<T extends { id: number }>({ recurso, registro,
   });
 
   function mudar(nome: string, valor: string) {
+    setTocado(true);
     const dependentes = recurso.campos.find((c) => c.nome === nome)?.limpa ?? [];
     setValores((v) => {
       const novo = { ...v, [nome]: valor };
@@ -213,7 +215,7 @@ export function FormularioRecurso<T extends { id: number }>({ recurso, registro,
   );
 
   return (
-    <Folha titulo={editando ? `Editar ${recurso.singular}` : `Novo(a) ${recurso.singular}`} aoFechar={aoFechar}>
+    <Folha titulo={editando ? `Editar ${recurso.singular}` : `Novo(a) ${recurso.singular}`} aoFechar={aoFechar} sujo={tocado}>
       {aninhado ? <div>{corpo}</div> : <form onSubmit={enviar} noValidate>{corpo}</form>}
     </Folha>
   );

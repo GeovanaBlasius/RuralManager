@@ -78,6 +78,7 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
   const [erroLocal, setErroLocal] = useState('');
   const [criandoCliente, setCriandoCliente] = useState(false);
   const [criandoColheitaEm, setCriandoColheitaEm] = useState<number | null>(null);
+  const [tocado, setTocado] = useState(false);
 
   const total = itens.reduce((s, i) => s + (lerDecimal(i.quantidade) ?? 0) * (lerDecimal(i.precoUnitario) ?? 0), 0);
 
@@ -97,8 +98,10 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
     onSuccess: async () => { await qc.invalidateQueries(); aoFechar(); },
   });
 
-  const mudaItem = (k: number, campo: keyof ItemForm, valor: string) =>
+  const mudaItem = (k: number, campo: keyof ItemForm, valor: string) => {
+    setTocado(true);
     setItens((l) => l.map((it, n) => (n === k ? { ...it, [campo]: valor } : it)));
+  };
 
   function enviar(e: FormEvent) {
     e.preventDefault();
@@ -115,12 +118,12 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
   const erroServidor = salvar.error instanceof ApiError ? salvar.error.campos : {};
 
   return (
-    <Folha titulo={editando ? 'Editar venda' : 'Nova venda'} aoFechar={aoFechar}>
+    <Folha titulo={editando ? 'Editar venda' : 'Nova venda'} aoFechar={aoFechar} sujo={tocado}>
       <form onSubmit={enviar} noValidate>
         <CampoForm id="cliente" rotulo="Cliente" erro={erroServidor.clienteId}
           dica={clientes.opcoes.length === 0 && !clientes.carregando ? 'Cadastre um cliente em Mais > Clientes.' : undefined}>
           <div className="selecao-com-criar">
-            <select id="cliente" value={clienteId} disabled={editando} onChange={(e) => setClienteId(e.target.value)}>
+            <select id="cliente" value={clienteId} disabled={editando} onChange={(e) => { setTocado(true); setClienteId(e.target.value); }}>
               <option value="">Selecione…</option>
               {clientes.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
             </select>
@@ -138,7 +141,7 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
           />
         )}
         <CampoForm id="data" rotulo="Data da venda" erro={erroServidor.dataCompra}>
-          <input id="data" type="date" value={data} onChange={(e) => setData(e.target.value)} />
+          <input id="data" type="date" value={data} onChange={(e) => { setTocado(true); setData(e.target.value); }} />
         </CampoForm>
 
         <h3 style={{ margin: '4px 0 10px' }}>Itens</h3>
@@ -172,7 +175,7 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
             )}
           </div>
         ))}
-        <button type="button" className="btn secundario pequeno" onClick={() => setItens((l) => [...l, itemVazio()])}>+ Adicionar item</button>
+        <button type="button" className="btn secundario pequeno" onClick={() => { setTocado(true); setItens((l) => [...l, itemVazio()]); }}>+ Adicionar item</button>
 
         <p style={{ margin: '16px 0', fontWeight: 700 }}>Total: {moeda(total)}</p>
         {erroLocal && <div className="aviso erro" role="alert">{erroLocal}</div>}

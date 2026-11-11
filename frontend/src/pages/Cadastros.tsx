@@ -6,7 +6,7 @@ import { catalogoCategorias, catalogoDestinos, catalogoProdutos, catalogoUnidade
 const ABAS = [
   { chave: 'produtos', rotulo: 'Produtos' },
   { chave: 'unidades', rotulo: 'Unidades' },
-  { chave: 'categorias', rotulo: 'Categorias de gasto' },
+  { chave: 'categorias', rotulo: 'Categorias' },
   { chave: 'destinos', rotulo: 'Destinos' },
 ] as const;
 

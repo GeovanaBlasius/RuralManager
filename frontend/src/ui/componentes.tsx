@@ -62,8 +62,12 @@ export function CampoSenha({ id, value, onChange, autoComplete }: {
   );
 }
 
-/** Folha que sobe do rodape no celular e vira janela no desktop. Fecha com Esc. */
-export function Folha({ titulo, aoFechar, children }: { titulo: string; aoFechar: () => void; children: ReactNode }) {
+/**
+ * Folha que sobe do rodape no celular e vira janela no desktop. Fecha com Esc.
+ * Com `sujo`, tocar fora so fecha o botao "x" explicito: evita descartar um formulario
+ * ja preenchido com um toque sem querer no fundo.
+ */
+export function Folha({ titulo, aoFechar, children, sujo }: { titulo: string; aoFechar: () => void; children: ReactNode; sujo?: boolean }) {
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => e.key === 'Escape' && aoFechar();
     window.addEventListener('keydown', tecla);
@@ -76,7 +80,7 @@ export function Folha({ titulo, aoFechar, children }: { titulo: string; aoFechar
   }, [aoFechar]);
 
   return (
-    <div className="folha-fundo" onMouseDown={(e) => e.target === e.currentTarget && aoFechar()}>
+    <div className="folha-fundo" onMouseDown={(e) => e.target === e.currentTarget && !sujo && aoFechar()}>
       <div className="folha" role="dialog" aria-modal="true" aria-label={titulo}>
         <div className="folha-topo">
           <h2>{titulo}</h2>

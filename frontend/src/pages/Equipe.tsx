@@ -58,9 +58,10 @@ function NovoOperador({ aoFechar }: { aoFechar: () => void }) {
   const campos = criar.error instanceof ApiError ? criar.error.campos : {};
   const muda = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((x) => ({ ...x, [k]: e.target.value }));
   const enviar = (e: FormEvent) => { e.preventDefault(); criar.mutate(); };
+  const sujo = v.nome !== '' || v.email !== '' || v.senha !== '';
 
   return (
-    <Folha titulo="Convidar operador" aoFechar={aoFechar}>
+    <Folha titulo="Convidar operador" aoFechar={aoFechar} sujo={sujo}>
       <form onSubmit={enviar}>
         <CampoForm id="n" rotulo="Nome" erro={campos.nome}><input id="n" value={v.nome} onChange={muda('nome')} required /></CampoForm>
         <CampoForm id="e" rotulo="E-mail" erro={campos.email}><input id="e" type="email" value={v.email} onChange={muda('email')} required /></CampoForm>
