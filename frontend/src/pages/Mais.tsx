@@ -24,23 +24,30 @@ export function Mais() {
   const emStandalone = window.matchMedia('(display-mode: standalone)').matches;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
+  const grupos = ['Cadastros', 'Operação', 'Conta'] as const;
+
   return (
     <>
       <div className="cabecalho-pagina"><h1>Mais</h1></div>
-      <div className="lista">
-        {LINKS_SECUNDARIOS.map((l) => (
-          <Link key={l.para} to={l.para} className="item" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <span style={{ width: 24, height: 24, color: 'var(--verde)' }}>{l.icone}</span>
-            <div className="corpo"><div className="titulo">{l.rotulo}</div></div>
-          </Link>
-        ))}
-        {sessao?.usuario.perfil === 'PRODUTOR' && (
-          <Link to="/equipe" className="item" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <span style={{ width: 24, height: 24, color: 'var(--verde)' }}>{Icones.pessoas}</span>
-            <div className="corpo"><div className="titulo">Equipe</div><div className="sub">Quem mais lança dados na sua conta</div></div>
-          </Link>
-        )}
-      </div>
+      {grupos.map((grupo) => (
+        <div key={grupo}>
+          <h2 className="secao">{grupo}</h2>
+          <div className="lista">
+            {LINKS_SECUNDARIOS.filter((l) => l.grupo === grupo).map((l) => (
+              <Link key={l.para} to={l.para} className="item" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <span style={{ width: 24, height: 24, color: 'var(--verde)' }}>{l.icone}</span>
+                <div className="corpo"><div className="titulo">{l.rotulo}</div></div>
+              </Link>
+            ))}
+            {grupo === 'Conta' && sessao?.usuario.perfil === 'PRODUTOR' && (
+              <Link to="/equipe" className="item" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <span style={{ width: 24, height: 24, color: 'var(--verde)' }}>{Icones.pessoas}</span>
+                <div className="corpo"><div className="titulo">Equipe</div><div className="sub">Quem mais lança dados na sua conta</div></div>
+              </Link>
+            )}
+          </div>
+        </div>
+      ))}
 
       {!emStandalone && (
         <div className="cartao" style={{ marginTop: 18 }}>

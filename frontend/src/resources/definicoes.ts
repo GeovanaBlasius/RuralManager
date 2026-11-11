@@ -33,7 +33,7 @@ export const culturas: Recurso<Cultura> = {
     { nome: 'safraId', rotulo: 'Safra', tipo: 'selecao', fonte: 'safras', obrigatorio: true, travadoAoEditar: true,
       criarRecurso: safras },
     { nome: 'produtoId', rotulo: 'Produto', tipo: 'selecao', fonte: 'produtos', obrigatorio: true,
-      dica: 'Não achou? Cadastre o produto em Mais > Cadastros.' },
+      dica: 'Não achou? Cadastre o produto em Mais > Catálogos.' },
     { nome: 'variedade', rotulo: 'Variedade', tipo: 'texto', obrigatorio: true, maxLength: 60 },
     { nome: 'areaHa', rotulo: 'Área plantada (hectares)', tipo: 'numero', obrigatorio: true },
     { nome: 'dataPlantio', rotulo: 'Data do plantio', tipo: 'data', obrigatorio: true },

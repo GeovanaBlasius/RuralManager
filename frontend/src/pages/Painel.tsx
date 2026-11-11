@@ -19,6 +19,8 @@ export function Painel() {
         <Link to="/gastos?novo=1">{Icones.gasto}Lançar gasto</Link>
         <Link to="/colheitas?novo=1">{Icones.colheita}Registrar colheita</Link>
         <Link to="/vendas?novo=1">{Icones.venda}Registrar venda</Link>
+        <Link to="/safras?novo=1">{Icones.safra}Nova safra</Link>
+        <Link to="/lavouras?novo=1">{Icones.colheita}Nova cultura</Link>
       </div>
 
       {q.isLoading && <Carregando />}

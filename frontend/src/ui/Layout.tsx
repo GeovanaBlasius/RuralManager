@@ -11,14 +11,14 @@ const PRINCIPAIS: { para: string; rotulo: string; icone: ReactNode; fim?: boolea
   { para: '/mais', rotulo: 'Mais', icone: Icones.mais },
 ];
 
-const SECUNDARIOS: { para: string; rotulo: string; icone: ReactNode }[] = [
-  { para: '/safras', rotulo: 'Safras', icone: Icones.safra },
-  { para: '/lavouras', rotulo: 'Culturas', icone: Icones.colheita },
-  { para: '/saidas', rotulo: 'Outras saídas', icone: Icones.estoque },
-  { para: '/estoque', rotulo: 'Estoque', icone: Icones.estoque },
-  { para: '/clientes', rotulo: 'Clientes', icone: Icones.pessoas },
-  { para: '/cadastros', rotulo: 'Cadastros', icone: Icones.lista },
-  { para: '/suporte', rotulo: 'Suporte', icone: Icones.suporte },
+const SECUNDARIOS: { para: string; rotulo: string; icone: ReactNode; grupo: string }[] = [
+  { para: '/safras', rotulo: 'Safras', icone: Icones.safra, grupo: 'Cadastros' },
+  { para: '/lavouras', rotulo: 'Culturas', icone: Icones.colheita, grupo: 'Cadastros' },
+  { para: '/clientes', rotulo: 'Clientes', icone: Icones.pessoas, grupo: 'Cadastros' },
+  { para: '/cadastros', rotulo: 'Catálogos', icone: Icones.lista, grupo: 'Cadastros' },
+  { para: '/saidas', rotulo: 'Outras saídas', icone: Icones.estoque, grupo: 'Operação' },
+  { para: '/estoque', rotulo: 'Estoque', icone: Icones.estoque, grupo: 'Operação' },
+  { para: '/suporte', rotulo: 'Suporte', icone: Icones.suporte, grupo: 'Conta' },
 ];
 
 export const LINKS_SECUNDARIOS = SECUNDARIOS;
