@@ -29,6 +29,9 @@ Contexto completo: `docs/CONTEXTO.md`. Material da disciplina: `docs/academico/`
 - Relatórios são SQL agregado (JdbcClient) — não trocar por laços com N+1. Listagens paginadas (máx. 100); `sort` do cliente é ignorado de propósito.
 - Banco: RLS ligado sem policies (fecha a API REST pública do Supabase; o JDBC com role dono ignora). Não criar policies sem pensar.
 
+## Commits
+Nunca adicionar linha de atribuição ao Claude (`Co-Authored-By: Claude ...` ou similar) em commits ou PRs deste repositório. A Geovana pediu para tirar isso; o histórico já foi reescrito uma vez por causa disso.
+
 ## Limitações conhecidas (decisões a revisar)
 - Sem verificação de e-mail no cadastro (dá para "ocupar" um CPF de outra pessoa).
 - Token JWT em localStorage (mitigado por expiração de 8 h e CSP no nginx).
