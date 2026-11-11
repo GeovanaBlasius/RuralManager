@@ -5,6 +5,8 @@ import { api, ApiError } from '../api/client';
 import type { Pagina, Venda } from '../api/types';
 import { dataBr, hojeIso, lerDecimal, moeda } from '../lib/formato';
 import { useOpcoes } from '../lib/fontes';
+import { FormularioRecurso } from '../resources/CrudPagina';
+import { clientes as recursoClientes, colheitas as recursoColheitas } from '../resources/definicoes';
 import { CampoForm, Carregando, Folha, MensagemErro, Vazio } from '../ui/componentes';
 
 interface ItemForm { colheitaId: string; quantidade: string; precoUnitario: string }
@@ -74,6 +76,8 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
   );
   const [confirmando, setConfirmando] = useState(false);
   const [erroLocal, setErroLocal] = useState('');
+  const [criandoCliente, setCriandoCliente] = useState(false);
+  const [criandoColheitaEm, setCriandoColheitaEm] = useState<number | null>(null);
 
   const total = itens.reduce((s, i) => s + (lerDecimal(i.quantidade) ?? 0) * (lerDecimal(i.precoUnitario) ?? 0), 0);
 
@@ -115,11 +119,24 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
       <form onSubmit={enviar} noValidate>
         <CampoForm id="cliente" rotulo="Cliente" erro={erroServidor.clienteId}
           dica={clientes.opcoes.length === 0 && !clientes.carregando ? 'Cadastre um cliente em Mais > Clientes.' : undefined}>
-          <select id="cliente" value={clienteId} disabled={editando} onChange={(e) => setClienteId(e.target.value)}>
-            <option value="">Selecione…</option>
-            {clientes.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
-          </select>
+          <div className="selecao-com-criar">
+            <select id="cliente" value={clienteId} disabled={editando} onChange={(e) => setClienteId(e.target.value)}>
+              <option value="">Selecione…</option>
+              {clientes.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
+            </select>
+            {!editando && (
+              <button type="button" className="btn secundario pequeno" onClick={() => setCriandoCliente(true)}>+ Novo(a)</button>
+            )}
+          </div>
         </CampoForm>
+        {criandoCliente && (
+          <FormularioRecurso
+            recurso={recursoClientes}
+            aninhado
+            aoFechar={() => setCriandoCliente(false)}
+            aoCriar={(novoId) => { setClienteId(String(novoId)); setCriandoCliente(false); }}
+          />
+        )}
         <CampoForm id="data" rotulo="Data da venda" erro={erroServidor.dataCompra}>
           <input id="data" type="date" value={data} onChange={(e) => setData(e.target.value)} />
         </CampoForm>
@@ -128,11 +145,22 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
         {itens.map((it, k) => (
           <div className="linha-item-venda" key={k}>
             <CampoForm id={`col-${k}`} rotulo="Colheita">
-              <select id={`col-${k}`} value={it.colheitaId} onChange={(e) => mudaItem(k, 'colheitaId', e.target.value)}>
-                <option value="">Selecione…</option>
-                {colheitas.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
-              </select>
+              <div className="selecao-com-criar">
+                <select id={`col-${k}`} value={it.colheitaId} onChange={(e) => mudaItem(k, 'colheitaId', e.target.value)}>
+                  <option value="">Selecione…</option>
+                  {colheitas.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
+                </select>
+                <button type="button" className="btn secundario pequeno" onClick={() => setCriandoColheitaEm(k)}>+ Novo(a)</button>
+              </div>
             </CampoForm>
+            {criandoColheitaEm === k && (
+              <FormularioRecurso
+                recurso={recursoColheitas}
+                aninhado
+                aoFechar={() => setCriandoColheitaEm(null)}
+                aoCriar={(novoId) => { mudaItem(k, 'colheitaId', String(novoId)); setCriandoColheitaEm(null); }}
+              />
+            )}
             <CampoForm id={`qtd-${k}`} rotulo="Quantidade">
               <input id={`qtd-${k}`} inputMode="decimal" value={it.quantidade} onChange={(e) => mudaItem(k, 'quantidade', e.target.value)} />
             </CampoForm>
@@ -140,7 +168,7 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
               <input id={`preco-${k}`} inputMode="decimal" value={it.precoUnitario} onChange={(e) => mudaItem(k, 'precoUnitario', e.target.value)} />
             </CampoForm>
             {itens.length > 1 && (
-              <button type="button" className="btn perigo pequeno" onClick={() => setItens((l) => l.filter((_, n) => n !== k))}>Remover item</button>
+              <button type="button" className="btn perigo pequeno" onClick={() => { setItens((l) => l.filter((_, n) => n !== k)); setCriandoColheitaEm(null); }}>Remover item</button>
             )}
           </div>
         ))}

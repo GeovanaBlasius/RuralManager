@@ -126,7 +126,7 @@ interface FormProps<T extends { id: number }> {
   aninhado?: boolean;
 }
 
-function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFechar, valoresIniciais, aoCriar, aninhado }: FormProps<T>) {
+export function FormularioRecurso<T extends { id: number }>({ recurso, registro, aoFechar, valoresIniciais, aoCriar, aninhado }: FormProps<T>) {
   const qc = useQueryClient();
   const editando = registro !== undefined;
   const [valores, setValores] = useState<Valores>(() => ({ ...recurso.paraFormulario(registro), ...valoresIniciais }));
