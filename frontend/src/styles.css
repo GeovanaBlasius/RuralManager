@@ -17,7 +17,11 @@
   --sombra: none;
   color-scheme: dark;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--borda) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--borda); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--texto-suave); }
 html, body, #root { height: 100%; }
 body {
   margin: 0;
@@ -79,7 +83,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .nav-lateral a.ativo { background: var(--verde-claro); color: var(--verde-escuro); font-weight: 600; }
   .principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .topo { display: none; }
-  .conteudo { padding-bottom: 40px; }
+  .conteudo { padding-bottom: 40px; max-width: 1040px; }
+  .lista { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 }
 @media (max-width: 899px) { .principal { display: contents; } }
 
@@ -151,6 +156,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .acoes { display: grid; gap: 10px; margin-top: 8px; }
 
 .grade-metricas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+@media (min-width: 900px) { .grade-metricas { grid-template-columns: repeat(4, 1fr); } }
 .metrica { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); padding: 12px 14px; }
 .metrica .rotulo { color: var(--texto-suave); font-size: 0.8rem; }
 .metrica .valor { font-size: 1.15rem; font-weight: 700; margin-top: 2px; }
