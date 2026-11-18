@@ -42,7 +42,7 @@ const FONTES: Record<Fonte, Definicao<unknown>> = {
     }),
   }),
   colheitas: def<Colheita>({
-    caminho: '/api/colheitas?tamanho=100', paginada: true,
+    caminho: '/api/colheitas', paginada: true,
     mapa: (x) => ({
       valor: String(x.id),
       rotulo: `${x.produtoNome} · ${x.variedade} · ${dataBr(x.dataColheita)} · restam ${numero(x.estoque)} ${x.unidadeSigla}`,
@@ -50,15 +50,28 @@ const FONTES: Record<Fonte, Definicao<unknown>> = {
     }),
   }),
   clientes: def<Cliente>({
-    caminho: '/api/clientes?tamanho=100', paginada: true,
+    caminho: '/api/clientes', paginada: true,
     mapa: (x) => ({ valor: String(x.id), rotulo: x.nome }),
   }),
 };
 
-export function useOpcoes(fonte: Fonte): { opcoes: Opcao[]; carregando: boolean } {
+/** Listas que podem crescer: usam busca e paginacao no servidor (SelecaoBusca) em vez do limite de 100. */
+export type FonteBuscavel = 'colheitas' | 'clientes';
+
+export const DEFINICOES_BUSCA: Record<FonteBuscavel, { caminho: string; mapa: (x: unknown) => Opcao }> = {
+  colheitas: { caminho: '/api/colheitas', mapa: FONTES.colheitas.mapa },
+  clientes: { caminho: '/api/clientes', mapa: FONTES.clientes.mapa },
+};
+
+export function ehBuscavel(fonte: Fonte | undefined): fonte is FonteBuscavel {
+  return fonte === 'colheitas' || fonte === 'clientes';
+}
+
+export function useOpcoes(fonte: Fonte, ativo = true): { opcoes: Opcao[]; carregando: boolean } {
   const d = FONTES[fonte];
   const q = useQuery({
     queryKey: ['opcoes', fonte],
+    enabled: ativo,
     staleTime: 30_000,
     queryFn: async (): Promise<Opcao[]> => {
       const r = await api.get<unknown[] | Pagina<unknown>>(d.caminho);

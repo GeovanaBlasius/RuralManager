@@ -13,6 +13,10 @@ export interface AuthResponse {
   usuario: import('./sessao').Usuario;
 }
 
+export interface ProdutividadeSafra {
+  safraId: number; safra: string; produto: string; areaHa: number; colhidoKg: number; produtividadeKgHa: number;
+}
+
 export interface CadastroResponse {
   email: string;
   verificacaoPendente: boolean;

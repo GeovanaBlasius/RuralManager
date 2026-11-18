@@ -307,3 +307,41 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .aviso-privacidade { display: flex; align-items: center; gap: 16px; justify-content: center; }
   .aviso-privacidade p { margin: 0; }
 }
+
+/* ---- Graficos de barras (sem biblioteca) ---- */
+.grafico { margin: 0 0 18px; }
+.grafico:last-child { margin-bottom: 0; }
+.grafico figcaption { font-weight: 600; margin-bottom: 8px; }
+.grafico ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.grafico li { display: grid; grid-template-columns: minmax(70px, 30%) 1fr auto; gap: 8px; align-items: center; font-size: 0.88rem; }
+.grafico-rotulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grafico-trilho { height: 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.grafico-barra { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--verde), var(--verde-escuro)); }
+.grafico-barra.negativa { background: #ef4444; }
+.grafico-valor { font-variant-numeric: tabular-nums; color: var(--texto-suave); }
+.grafico-vazio, .dica-grafico { color: var(--texto-suave); font-size: 0.85rem; margin: 4px 0 0; }
+
+/* ---- Seletor com busca ---- */
+.selecao-busca { display: grid; gap: 6px; width: 100%; }
+.selecao-busca-rodape { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--texto-suave); }
+
+/* ---- Avisos de conexao e acoes do relatorio ---- */
+.aviso-conexao { margin-bottom: 10px; }
+
+.acoes-relatorio { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+
+/* ---- Impressao / Salvar em PDF: so o conteudo, sem navegacao nem botoes ---- */
+@media print {
+  .nav-lateral, .nav-inferior, .topo, .acoes-relatorio, .aviso-conexao, .btn { display: none !important; }
+  html, body { background: #fff !important; color: #111 !important; }
+  .principal, .conteudo { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  .cartao, .metrica, .aviso { background: #fff !important; color: #111 !important; border: 1px solid #bbb !important; box-shadow: none !important; backdrop-filter: none !important; break-inside: avoid; }
+  .grafico-valor, .grafico-vazio, .dica-grafico { color: #333 !important; }
+  .grafico-trilho { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grafico-barra { background: #16a34a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grafico-barra.negativa { background: #dc2626 !important; }
+  .positivo { color: #15803d !important; }
+  .negativo { color: #b91c1c !important; }
+  a { color: inherit !important; text-decoration: none; }
+}
+.selecao-com-criar .selecao-busca { flex: 1; min-width: 0; }

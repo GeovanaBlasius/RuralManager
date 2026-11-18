@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth';
+import { AvisosDeConexao } from './AvisosDeConexao';
 import { Icones } from './componentes';
 
 const PRINCIPAIS: { para: string; rotulo: string; icone: ReactNode; fim?: boolean }[] = [
@@ -55,7 +56,10 @@ export function Layout() {
           <h1>{pathname === '/' ? <span className="marca">RuralManager</span> : titulo}</h1>
           <button type="button" onClick={sair} aria-label="Sair">Sair</button>
         </header>
-        <main className="conteudo"><Outlet /></main>
+        <main className="conteudo">
+          <AvisosDeConexao />
+          <Outlet />
+        </main>
       </div>
 
       <nav className="nav-inferior" aria-label="Principal">

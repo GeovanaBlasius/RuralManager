@@ -34,7 +34,11 @@ public class ClienteServico {
     }
 
     @Transactional(readOnly = true)
-    public Pagina<ClienteResponse> listar(Pageable pageable) {
+    public Pagina<ClienteResponse> listar(String busca, Pageable pageable) {
+        if (busca != null && !busca.isBlank()) {
+            return Pagina.de(clientes.findByProdutorIdAndNomeContainingIgnoreCaseOrderByNome(
+                    contexto.produtorId(), busca.trim(), pageable), ClienteResponse::de);
+        }
         return Pagina.de(clientes.findByProdutorIdOrderByNome(contexto.produtorId(), pageable), ClienteResponse::de);
     }
 

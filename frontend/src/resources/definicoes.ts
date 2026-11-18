@@ -89,7 +89,7 @@ export const gastos: Recurso<Gasto> = {
       filtrar: (o, v) => !!v.safraId && o.dados?.safraId === v.safraId, criarRecurso: culturas },
     { nome: 'colheitaId', rotulo: 'Colheita', tipo: 'selecao', fonte: 'colheitas',
       dica: 'Opcional. Escolha a cultura primeiro.',
-      filtrar: (o, v) => !!v.culturaId && o.dados?.culturaId === v.culturaId },
+      parametrosBusca: (v) => (v.culturaId ? { culturaId: v.culturaId } : null) },
     { nome: 'categoriaGastoId', rotulo: 'Categoria', tipo: 'selecao', fonte: 'categorias', obrigatorio: true },
     { nome: 'descricao', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true, maxLength: 160 },
     { nome: 'valor', rotulo: 'Valor (R$)', tipo: 'dinheiro', obrigatorio: true },

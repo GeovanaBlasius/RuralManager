@@ -28,6 +28,11 @@ public class RelatorioController {
         return servico.safra(id);
     }
 
+    @GetMapping("/produtividade")
+    public List<ProdutividadeSafra> produtividade() {
+        return servico.produtividade();
+    }
+
     @GetMapping("/estoque")
     public List<EstoqueColheita> estoque(@RequestParam(required = false) Long safraId) {
         return servico.estoque(safraId);

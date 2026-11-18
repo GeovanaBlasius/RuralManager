@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import type { Pagina, Venda } from '../api/types';
 import { dataBr, hojeIso, lerDecimal, moeda } from '../lib/formato';
-import { useOpcoes } from '../lib/fontes';
+import { SelecaoBusca } from '../ui/SelecaoBusca';
 import { FormularioRecurso } from '../resources/CrudPagina';
 import { clientes as recursoClientes, colheitas as recursoColheitas } from '../resources/definicoes';
 import { CampoForm, Carregando, Folha, MensagemErro, Vazio } from '../ui/componentes';
@@ -65,8 +65,6 @@ export function Vendas() {
 
 function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => void }) {
   const qc = useQueryClient();
-  const clientes = useOpcoes('clientes');
-  const colheitas = useOpcoes('colheitas');
   const editando = venda !== undefined;
 
   const [clienteId, setClienteId] = useState(venda ? String(venda.clienteId) : '');
@@ -120,13 +118,10 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
   return (
     <Folha titulo={editando ? 'Editar venda' : 'Nova venda'} aoFechar={aoFechar} sujo={tocado}>
       <form onSubmit={enviar} noValidate>
-        <CampoForm id="cliente" rotulo="Cliente" erro={erroServidor.clienteId}
-          dica={clientes.opcoes.length === 0 && !clientes.carregando ? 'Cadastre um cliente em Mais > Clientes.' : undefined}>
+        <CampoForm id="cliente" rotulo="Cliente" erro={erroServidor.clienteId}>
           <div className="selecao-com-criar">
-            <select id="cliente" value={clienteId} disabled={editando} onChange={(e) => { setTocado(true); setClienteId(e.target.value); }}>
-              <option value="">Selecione…</option>
-              {clientes.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
-            </select>
+            <SelecaoBusca id="cliente" fonte="clientes" valor={clienteId} desabilitado={editando} obrigatorio
+              aoMudar={(v) => { setTocado(true); setClienteId(v); }} />
             {!editando && (
               <button type="button" className="btn secundario pequeno" onClick={() => setCriandoCliente(true)}>+ Novo(a)</button>
             )}
@@ -149,10 +144,8 @@ function FormularioVenda({ venda, aoFechar }: { venda?: Venda; aoFechar: () => v
           <div className="linha-item-venda" key={k}>
             <CampoForm id={`col-${k}`} rotulo="Colheita">
               <div className="selecao-com-criar">
-                <select id={`col-${k}`} value={it.colheitaId} onChange={(e) => mudaItem(k, 'colheitaId', e.target.value)}>
-                  <option value="">Selecione…</option>
-                  {colheitas.opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
-                </select>
+                <SelecaoBusca id={`col-${k}`} fonte="colheitas" valor={it.colheitaId} obrigatorio
+                  aoMudar={(v) => mudaItem(k, 'colheitaId', v)} />
                 <button type="button" className="btn secundario pequeno" onClick={() => setCriandoColheitaEm(k)}>+ Novo(a)</button>
               </div>
             </CampoForm>

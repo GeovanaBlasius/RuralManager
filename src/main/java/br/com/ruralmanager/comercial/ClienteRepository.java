@@ -9,6 +9,9 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     Page<Cliente> findByProdutorIdOrderByNome(Long produtorId, Pageable pageable);
 
+    /** Busca por parte do nome (o Spring escapa % e _ no Containing). */
+    Page<Cliente> findByProdutorIdAndNomeContainingIgnoreCaseOrderByNome(Long produtorId, String nome, Pageable pageable);
+
     Optional<Cliente> findByIdAndProdutorId(Long id, Long produtorId);
 
     boolean existsByProdutorIdAndCpfCnpj(Long produtorId, String cpfCnpj);

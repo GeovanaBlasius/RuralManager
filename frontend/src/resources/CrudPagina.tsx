@@ -4,7 +4,10 @@ import { useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import type { Pagina } from '../api/types';
 import { CampoForm, Carregando, Folha, MensagemErro, Vazio } from '../ui/componentes';
-import { useOpcoes } from '../lib/fontes';
+import { useAuth } from '../auth';
+import { ehBuscavel, useOpcoes, type FonteBuscavel } from '../lib/fontes';
+import { enfileirar, RECURSOS_NA_FILA } from '../lib/filaOffline';
+import { SelecaoBusca } from '../ui/SelecaoBusca';
 import type { Campo, Recurso, Valores } from './tipos';
 
 interface Props<T extends { id: number }> {
@@ -134,14 +137,31 @@ export function FormularioRecurso<T extends { id: number }>({ recurso, registro,
   const [confirmando, setConfirmando] = useState(false);
   const [tocado, setTocado] = useState(false);
 
+  const { sessao } = useAuth();
   const salvar = useMutation({
-    mutationFn: () =>
-      editando
-        ? api.put(`${recurso.caminho}/${registro.id}`, recurso.paraPayload(valores))
-        : api.post<{ id: number }>(recurso.caminho, recurso.paraPayload(valores)),
+    mutationFn: async (): Promise<{ id?: number } | undefined> => {
+      if (editando) return api.put(`${recurso.caminho}/${registro.id}`, recurso.paraPayload(valores));
+      try {
+        return await api.post<{ id: number }>(recurso.caminho, recurso.paraPayload(valores));
+      } catch (e) {
+        // Sem internet de verdade (o aparelho avisa que esta offline): guarda no aparelho e envia quando voltar.
+        // So para criacoes que nao dependem de outro registro ainda nao enviado.
+        const offline = e instanceof ApiError && e.status === 0 && !navigator.onLine;
+        if (offline && sessao && RECURSOS_NA_FILA.has(recurso.chave) && !aninhado) {
+          enfileirar(window.localStorage, {
+            usuarioId: sessao.usuario.id,
+            caminho: recurso.caminho,
+            corpo: recurso.paraPayload(valores),
+            rotulo: `${recurso.singular[0].toUpperCase()}${recurso.singular.slice(1)}: ${valores.descricao || valores.dataGasto || valores.dataColheita || valores.dataSaida || 'novo'}`,
+          });
+          return undefined;
+        }
+        throw e;
+      }
+    },
     onSuccess: async (resultado) => {
       await qc.invalidateQueries(); // estoque e relatorios dependem de quase tudo
-      if (!editando && aoCriar) aoCriar((resultado as { id: number }).id);
+      if (!editando && aoCriar && resultado?.id !== undefined) aoCriar(resultado.id);
       aoFechar();
     },
   });
@@ -261,12 +281,24 @@ function Selecao({ id, campo, valor, valores, travado, aoMudar }: {
   id: string; campo: Campo; valor: string; valores: Valores; travado?: boolean;
   aoMudar: (nome: string, valor: string) => void;
 }) {
-  const { opcoes, carregando } = useOpcoes(campo.fonte!);
+  const buscavel = ehBuscavel(campo.fonte);
+  const { opcoes, carregando } = useOpcoes(campo.fonte!, !buscavel);
   const visiveis = campo.filtrar ? opcoes.filter((o) => campo.filtrar!(o, valores)) : opcoes;
   const [criando, setCriando] = useState(false);
   const criarRecurso = campo.criarRecurso;
 
-  const select = (
+  const select = buscavel ? (
+    <SelecaoBusca
+      id={id}
+      fonte={campo.fonte as FonteBuscavel}
+      valor={valor}
+      desabilitado={travado}
+      obrigatorio={campo.obrigatorio}
+      parametros={campo.parametrosBusca ? campo.parametrosBusca(valores) : {}}
+      textoBloqueado={campo.dica}
+      aoMudar={(v) => aoMudar(campo.nome, v)}
+    />
+  ) : (
     <select id={id} value={valor} disabled={travado || carregando} onChange={(e) => aoMudar(campo.nome, e.target.value)}>
       <option value="">{carregando ? 'Carregando…' : campo.obrigatorio ? 'Selecione…' : '— nenhum —'}</option>
       {visiveis.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}

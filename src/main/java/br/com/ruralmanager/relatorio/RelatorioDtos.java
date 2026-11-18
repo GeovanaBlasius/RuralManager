@@ -41,6 +41,14 @@ public final class RelatorioDtos {
                                  List<GastoPorCategoria> gastosPorCategoria) {
     }
 
+    /**
+     * Produtividade de um produto em uma safra (soma das culturas daquele produto). Culturas com alguma
+     * colheita em unidade sem peso (duzia, unidade) ficam de fora, pois nao tem como somar em quilos.
+     */
+    public record ProdutividadeSafra(Long safraId, String safra, String produto, BigDecimal areaHa,
+                                     BigDecimal colhidoKg, BigDecimal produtividadeKgHa) {
+    }
+
     public record EstoqueColheita(Long colheitaId, String produto, String variedade, String safra,
                                   LocalDate dataColheita, String unidade, BigDecimal colhido,
                                   BigDecimal vendido, BigDecimal destinado, BigDecimal estoque) {

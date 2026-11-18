@@ -23,22 +23,84 @@ interface Problema {
   codigo?: string;
 }
 
+export const EVENTO_API_ACORDANDO = 'rm:api-acordando';
+
+/** Esperas entre tentativas enquanto o servidor acorda (hospedagem gratuita dorme sem uso): ~55 s no total. */
+export const ESPERAS_MS = [2000, 3000, 5000, 8000, 10000, 12000, 15000];
+
+export interface SituacaoDaResposta {
+  metodo: string;
+  /** fetch lancou erro (sem rede, DNS, conexao recusada). */
+  falhouRede: boolean;
+  /** Aparelho sem internet: esperar nao adianta. */
+  semInternet: boolean;
+  status?: number;
+  tipoConteudo?: string | null;
+}
+
+/**
+ * Decide se vale tentar de novo porque o servidor provavelmente esta acordando.
+ * - Falha de rede: so em GET (um POST pode ter chegado ao servidor e repetir duplicaria o lancamento).
+ * - 502/503/504 que NAO sao JSON: e o proxy da hospedagem, a requisicao nem chegou na API (seguro repetir
+ *   qualquer metodo). Um 503 em JSON e resposta da propria API (ex.: e-mail nao configurado): nao repete.
+ */
+export function deveTentarDeNovo(s: SituacaoDaResposta): boolean {
+  if (s.semInternet) return false;
+  if (s.falhouRede) return s.metodo === 'GET';
+  if (s.status !== undefined && [502, 503, 504].includes(s.status)) {
+    return !(s.tipoConteudo ?? '').includes('json');
+  }
+  return false;
+}
+
+function avisarAcordando(acordando: boolean): void {
+  window.dispatchEvent(new CustomEvent(EVENTO_API_ACORDANDO, { detail: acordando }));
+}
+
+const esperar = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+async function buscarComRetentativa(url: string, init: RequestInit): Promise<Response> {
+  const metodo = (init.method ?? 'GET').toUpperCase();
+  for (let tentativa = 0; ; tentativa++) {
+    let resposta: Response | undefined;
+    let falhouRede = false;
+    try {
+      resposta = await fetch(url, init);
+    } catch {
+      falhouRede = true;
+    }
+    const repetir = deveTentarDeNovo({
+      metodo, falhouRede, semInternet: typeof navigator !== 'undefined' && navigator.onLine === false,
+      status: resposta?.status, tipoConteudo: resposta?.headers.get('content-type'),
+    });
+    if (repetir && tentativa < ESPERAS_MS.length) {
+      avisarAcordando(true);
+      await esperar(ESPERAS_MS[tentativa]);
+      continue;
+    }
+    avisarAcordando(false);
+    if (!resposta) throw new ApiError(0, 'Sem conexão com o servidor. Verifique a internet e tente de novo.');
+    return resposta;
+  }
+}
+
+/** Cutuca a API logo ao abrir o app para ela acordar enquanto a pessoa digita. Sem CORS, sem resposta lida. */
+export function acordarApi(): void {
+  if (!BASE) return;
+  fetch(`${BASE}/actuator/health/liveness`, { mode: 'no-cors' }).catch(() => undefined);
+}
+
 async function request<T>(metodo: string, caminho: string, corpo?: unknown): Promise<T> {
   const sessao = lerSessao();
   const cabecalhos: Record<string, string> = { Accept: 'application/json' };
   if (corpo !== undefined) cabecalhos['Content-Type'] = 'application/json';
   if (sessao) cabecalhos.Authorization = `Bearer ${sessao.token}`;
 
-  let resposta: Response;
-  try {
-    resposta = await fetch(`${BASE}${caminho}`, {
-      method: metodo,
-      headers: cabecalhos,
-      body: corpo === undefined ? undefined : JSON.stringify(corpo),
-    });
-  } catch {
-    throw new ApiError(0, 'Sem conexão com o servidor. Verifique a internet e tente de novo.');
-  }
+  const resposta = await buscarComRetentativa(`${BASE}${caminho}`, {
+    method: metodo,
+    headers: cabecalhos,
+    body: corpo === undefined ? undefined : JSON.stringify(corpo),
+  });
 
   if (resposta.status === 204) return undefined as T;
 

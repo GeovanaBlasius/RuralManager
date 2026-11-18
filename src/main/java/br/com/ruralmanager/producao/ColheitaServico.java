@@ -58,8 +58,12 @@ public class ColheitaServico {
     }
 
     @Transactional(readOnly = true)
-    public Pagina<ColheitaResponse> listar(Long culturaId, Pageable pageable) {
+    public Pagina<ColheitaResponse> listar(Long culturaId, String busca, Pageable pageable) {
         Long pid = contexto.produtorId();
+        String padrao = br.com.ruralmanager.comum.Paginacao.padraoDeBusca(busca);
+        if (padrao != null && culturaId == null) {
+            return montar(colheitas.buscarPorNome(pid, padrao, pageable));
+        }
         Page<Colheita> pagina = culturaId == null
                 ? colheitas.findByCultura_Safra_Produtor_IdOrderByDataColheitaDesc(pid, pageable)
                 : colheitas.findByCulturaIdAndCultura_Safra_Produtor_IdOrderByDataColheitaDesc(culturaId, pid, pageable);

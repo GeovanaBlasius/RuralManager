@@ -108,6 +108,11 @@ cobre) cada uma. [`docs/REGRAS.md`](docs/REGRAS.md).
 - Canal de suporte: o usuário relata problemas e um painel de administrador acompanha e resolve.
 - Catálogos compartilhados entre produtores (produtos, unidades de medida, categorias de gasto, destinos), mantidos por um administrador.
 - Instalável como PWA: ícone na tela inicial, abre em tela cheia.
+- Relatório da safra exportável: **planilha CSV** (abre direto no Excel em português, com proteção contra fórmulas injetadas) e **PDF** pelo botão "Salvar em PDF" (usa a impressão do navegador, com layout próprio para papel; funciona offline).
+- Gráficos: resultado por cultura, gastos por categoria (no relatório da safra) e produtividade em kg/ha de cada produto ao longo das safras (no painel).
+- Lançamentos sem internet: gasto, colheita e saída criados offline ficam guardados no aparelho e são enviados sozinhos quando a conexão volta; se o servidor recusar algum, ele aparece com o motivo para você descartar ou corrigir. Vendas e cadastros que dependem de outro registro novo exigem conexão. As listas de apoio (safras, culturas...) só aparecem offline se já tiverem sido carregadas na sessão aberta.
+- Aviso de "servidor acordando": na hospedagem gratuita a API dorme; o app avisa, repete a chamada sozinho por até cerca de 1 minuto e já "cutuca" a API ao abrir a tela de entrada.
+- Seletores de colheita e cliente com busca pelo nome e "Mostrar mais" (20 por vez), no lugar do corte fixo em 100 itens.
 
 ## Tecnologias
 

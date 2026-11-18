@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import type { RelatorioSafra as Dados } from '../api/types';
+import { baixarCsv, linhasDoRelatorio } from '../lib/exportar';
 import { moeda, numero } from '../lib/formato';
+import { Barras } from '../ui/graficos';
 import { Carregando, MensagemErro, Metrica, tomDoValor } from '../ui/componentes';
 
 export function RelatorioSafra() {
@@ -14,7 +16,20 @@ export function RelatorioSafra() {
     <>
       <div className="cabecalho-pagina">
         <h1>Safra {r?.rotulo ?? ''}</h1>
-        <Link className="btn secundario pequeno" to="/">← Início</Link>
+        <div className="acoes-relatorio">
+          {r && (
+            <>
+              <button type="button" className="btn secundario pequeno"
+                onClick={() => baixarCsv(`relatorio-safra-${r.rotulo}`, linhasDoRelatorio(r))}>
+                Baixar planilha (CSV)
+              </button>
+              <button type="button" className="btn secundario pequeno" onClick={() => window.print()}>
+                Salvar em PDF
+              </button>
+            </>
+          )}
+          <Link className="btn secundario pequeno" to="/">← Início</Link>
+        </div>
       </div>
       {q.isLoading && <Carregando />}
       <MensagemErro erro={q.error} />
@@ -29,6 +44,20 @@ export function RelatorioSafra() {
           <div className="aviso">
             Custos gerais da safra (sem cultura): <strong>{moeda(r.custoGeral)}</strong>. Eles entram no custo total e no resultado,
             mas não são divididos entre as culturas abaixo.
+          </div>
+
+          <h2 className="secao">Gráficos</h2>
+          <div className="cartao">
+            <Barras
+              titulo="Resultado (lucro) por cultura"
+              vazio="Nenhuma cultura nesta safra."
+              itens={r.culturas.map((c) => ({ rotulo: `${c.produto} · ${c.variedade}`, valor: c.lucro, texto: moeda(c.lucro) }))}
+            />
+            <Barras
+              titulo="Gastos por categoria"
+              vazio="Nenhum gasto lançado."
+              itens={r.gastosPorCategoria.map((g) => ({ rotulo: g.categoria, valor: g.total, texto: `${moeda(g.total)} · ${numero(g.percentual, 1)}%` }))}
+            />
           </div>
 
           <h2 className="secao">Por cultura</h2>

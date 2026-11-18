@@ -22,9 +22,10 @@ public final class ComercialControllers {
         }
 
         @GetMapping
-        public Pagina<ClienteResponse> listar(@RequestParam(defaultValue = "0") int pagina,
+        public Pagina<ClienteResponse> listar(@RequestParam(required = false) String busca,
+                                              @RequestParam(defaultValue = "0") int pagina,
                                               @RequestParam(defaultValue = "20") int tamanho) {
-            return servico.listar(Paginacao.de(pagina, tamanho));
+            return servico.listar(busca, Paginacao.de(pagina, tamanho));
         }
 
         @GetMapping("/{id}")

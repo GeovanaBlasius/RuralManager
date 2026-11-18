@@ -17,6 +17,16 @@ public interface ColheitaRepository extends JpaRepository<Colheita, Long> {
     Page<Colheita> findByCulturaIdAndCultura_Safra_Produtor_IdOrderByDataColheitaDesc(
             Long culturaId, Long produtorId, Pageable pageable);
 
+    /** Busca por parte do nome do produto ou da variedade; o padrao vem de Paginacao.padraoDeBusca. */
+    @Query(value = "select c from Colheita c join c.cultura cu join cu.safra s join cu.produto p "
+            + "where s.produtor.id = :pid and (lower(p.nome) like :padrao escape '!' "
+            + "or lower(cu.variedade) like :padrao escape '!') "
+            + "order by c.dataColheita desc, c.id desc",
+            countQuery = "select count(c) from Colheita c join c.cultura cu join cu.safra s join cu.produto p "
+                    + "where s.produtor.id = :pid and (lower(p.nome) like :padrao escape '!' "
+                    + "or lower(cu.variedade) like :padrao escape '!')")
+    Page<Colheita> buscarPorNome(@Param("pid") Long produtorId, @Param("padrao") String padrao, Pageable pageable);
+
     Optional<Colheita> findByIdAndCultura_Safra_Produtor_Id(Long id, Long produtorId);
 
     boolean existsByCulturaId(Long culturaId);

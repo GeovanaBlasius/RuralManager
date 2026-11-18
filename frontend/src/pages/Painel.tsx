@@ -1,10 +1,37 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Painel as PainelDados } from '../api/types';
+import type { Painel as PainelDados, ProdutividadeSafra } from '../api/types';
+import { Barras } from '../ui/graficos';
 import { useAuth } from '../auth';
 import { moeda, numero } from '../lib/formato';
 import { Carregando, Icones, MensagemErro, Metrica, tomDoValor, Vazio } from '../ui/componentes';
+
+/** Produtividade (kg por hectare) de cada produto ao longo das safras, para ver se esta melhorando. */
+function Produtividade() {
+  const q = useQuery({
+    queryKey: ['produtividade'],
+    queryFn: () => api.get<ProdutividadeSafra[]>('/api/relatorios/produtividade'),
+  });
+  if (!q.data || q.data.length === 0) return null;
+  const porProduto = new Map<string, ProdutividadeSafra[]>();
+  for (const p of q.data) porProduto.set(p.produto, [...(porProduto.get(p.produto) ?? []), p]);
+  return (
+    <>
+      <h2 className="secao">Produtividade entre safras</h2>
+      <div className="cartao">
+        {[...porProduto.entries()].map(([produto, linhas]) => (
+          <Barras
+            key={produto}
+            titulo={`${produto} (kg por hectare)`}
+            itens={linhas.map((l) => ({ rotulo: `Safra ${l.safra}`, valor: l.produtividadeKgHa, texto: `${numero(l.produtividadeKgHa)} kg/ha` }))}
+          />
+        ))}
+        <p className="dica-grafico">Só entram culturas cujas colheitas estão em unidades com peso (saca, quilo, tonelada).</p>
+      </div>
+    </>
+  );
+}
 
 export function Painel() {
   const { sessao } = useAuth();
@@ -34,6 +61,8 @@ export function Painel() {
             <Metrica rotulo="Resultado" valor={moeda(q.data.lucroTotal)} tom={tomDoValor(q.data.lucroTotal)} />
             <Metrica rotulo="Safras" valor={String(q.data.totalSafras)} />
           </div>
+
+          <Produtividade />
 
           <h2 className="secao">Suas safras</h2>
           {q.data.safras.length === 0 && (

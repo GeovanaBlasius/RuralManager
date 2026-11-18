@@ -133,6 +133,37 @@ public class RelatorioServico {
                 lucro, percentual(lucro, receitaTotal), culturas, categorias);
     }
 
+    // ------------------------------------------------------- produtividade entre safras
+
+    @Transactional(readOnly = true)
+    public List<ProdutividadeSafra> produtividade() {
+        return jdbc.sql("""
+                SELECT s.id, s.ano_inicio, s.ano_fim, p.nome AS produto,
+                       SUM(c.area_ha) AS area, SUM(k.kg) AS kg
+                  FROM safra s
+                  JOIN cultura c ON c.safra_id = s.id
+                  JOIN produto p ON p.id = c.produto_id
+                  JOIN (SELECT co.cultura_id, SUM(co.quantidade * u.fator_kg) AS kg
+                          FROM colheita co
+                          JOIN cultura cu ON cu.id = co.cultura_id
+                          JOIN safra sa ON sa.id = cu.safra_id
+                          JOIN unidade_medida u ON u.id = co.unidade_medida_id
+                         WHERE sa.produtor_id = :pid
+                         GROUP BY co.cultura_id
+                        HAVING BOOL_AND(u.fator_kg IS NOT NULL)) k ON k.cultura_id = c.id
+                 WHERE s.produtor_id = :pid
+                 GROUP BY s.id, s.ano_inicio, s.ano_fim, p.nome
+                 ORDER BY p.nome, s.ano_inicio, s.ano_fim
+                """)
+                .param("pid", contexto.produtorId())
+                .query((rs, n) -> {
+                    BigDecimal area = rs.getBigDecimal("area");
+                    BigDecimal kg = rs.getBigDecimal("kg");
+                    return new ProdutividadeSafra(rs.getLong("id"), rs.getInt("ano_inicio") + "/" + rs.getInt("ano_fim"),
+                            rs.getString("produto"), area, kg, dividir(kg, area));
+                }).list();
+    }
+
     // ------------------------------------------------------------------ estoque
 
     @Transactional(readOnly = true)

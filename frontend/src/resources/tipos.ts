@@ -14,6 +14,11 @@ export interface Campo {
   fonte?: Fonte;
   /** Restringe as opcoes conforme o que ja foi preenchido (ex.: lavouras da safra escolhida). */
   filtrar?: (opcao: Opcao, valores: Valores) => boolean;
+  /**
+   * Para fontes com busca no servidor (colheitas, clientes): filtros extras da listagem a partir do que
+   * ja foi preenchido. Devolver null deixa o campo bloqueado ate o campo anterior ser preenchido.
+   */
+  parametrosBusca?: (valores: Valores) => Record<string, string> | null;
   /** So na criacao: depois de salvo o campo fica travado (o servidor tambem recusa mudar). */
   travadoAoEditar?: boolean;
   /** Campos que devem ser esvaziados quando este muda (ex.: trocar a safra invalida a lavoura escolhida). */

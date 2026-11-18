@@ -8,6 +8,7 @@ import br.com.ruralmanager.producao.ProducaoDtos.CulturaResponse;
 import br.com.ruralmanager.producao.ProducaoDtos.GastoRequest;
 import br.com.ruralmanager.producao.ProducaoDtos.SafraRequest;
 import br.com.ruralmanager.producao.ProducaoDtos.SafraResponse;
+import br.com.ruralmanager.relatorio.RelatorioDtos;
 import br.com.ruralmanager.relatorio.RelatorioDtos.RelatorioSafra;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,5 +49,19 @@ class RelatorioContratoIT extends IntegrationTestBase {
         assertThat(cultura.produtividadeKgHa()).isEqualByComparingTo("2010.81");
         assertThat(cultura.custo()).isEqualByComparingTo("4500");
         assertThat(cultura.custoPorHa()).isEqualByComparingTo("243.24");
+
+        // O mesmo numero aparece na comparacao entre safras (so as proprias safras do produtor).
+        var tipo = new org.springframework.core.ParameterizedTypeReference<java.util.List<RelatorioDtos.ProdutividadeSafra>>() {
+        };
+        var comparacao = rest.exchange("/api/relatorios/produtividade", org.springframework.http.HttpMethod.GET,
+                new org.springframework.http.HttpEntity<>(authHeaders(produtor.token())), tipo).getBody();
+        assertThat(comparacao).hasSize(1);
+        assertThat(comparacao.get(0).safra()).isEqualTo(ano + "/" + (ano + 1));
+        assertThat(comparacao.get(0).produtividadeKgHa()).isEqualByComparingTo("2010.81");
+
+        var outro = cadastrar("Outro Produtor", null, "outro.rel." + System.nanoTime() + "@teste.com", "senhaSegura123");
+        var doOutro = rest.exchange("/api/relatorios/produtividade", org.springframework.http.HttpMethod.GET,
+                new org.springframework.http.HttpEntity<>(authHeaders(outro.token())), tipo).getBody();
+        assertThat(doOutro).isEmpty();
     }
 }

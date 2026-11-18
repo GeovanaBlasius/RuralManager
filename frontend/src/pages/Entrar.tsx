@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { api, ApiError } from '../api/client';
+import { useEffect, useState, type FormEvent } from 'react';
+import { acordarApi, api, ApiError } from '../api/client';
 import { useAuth } from '../auth';
 import { AvisoPrivacidade, CampoForm, CampoSenha, MensagemErro } from '../ui/componentes';
 
@@ -14,7 +14,10 @@ export function Entrar() {
   const [enviando, setEnviando] = useState(false);
   const [campos, setCampos] = useState<Record<string, string>>({});
 
-  const muda = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((x) => ({ ...x, [k]: e.target.value }));
+  // A API gratuita dorme sem uso: cutuca ao abrir a tela de entrada para ela acordar enquanto a pessoa digita.
+  useEffect(() => { acordarApi(); }, []);
+
+  const muda =(k: keyof typeof v) => (e: { target: { value: string } }) => setV((x) => ({ ...x, [k]: e.target.value }));
 
   function trocarModo(novo: Modo) {
     setModo(novo);

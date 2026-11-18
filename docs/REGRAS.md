@@ -64,8 +64,8 @@ seguida das demais diferenças de schema, listadas no README.
 
 ## Cobertura de testes
 
-Suíte atual: 17 testes unitários (`Documentos`, `Datas`, `Safra`, `RelatorioCalculos`) e 35 de
-integração com Testcontainers/Postgres real (`*IT`): isolamento entre produtores
+Suíte atual: 17 testes unitários (`Documentos`, `Datas`, `Safra`, `RelatorioCalculos`) e 37 de
+integração (inclui `BuscaIT`: busca por nome nas listas de clientes e colheitas, paginação e isolamento) com Testcontainers/Postgres real (`*IT`): isolamento entre produtores
 (`IsolamentoEntreProdutoresIT`), estoque e venda concorrente (`EstoqueEConcorrenciaIT`),
 regras de data (`RegrasDeDataIT`), login, recuperação de senha e limitador de tentativas
 (`AutenticacaoIT`), perfis ADMIN/PRODUTOR/OPERADOR (`PerfisIT`) e o contrato do relatório com os

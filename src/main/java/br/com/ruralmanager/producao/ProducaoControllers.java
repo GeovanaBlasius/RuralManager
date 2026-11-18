@@ -98,9 +98,10 @@ public final class ProducaoControllers {
 
         @GetMapping
         public Pagina<ColheitaResponse> listar(@RequestParam(required = false) Long culturaId,
+                                               @RequestParam(required = false) String busca,
                                                @RequestParam(defaultValue = "0") int pagina,
                                                @RequestParam(defaultValue = "20") int tamanho) {
-            return servico.listar(culturaId, Paginacao.de(pagina, tamanho));
+            return servico.listar(culturaId, busca, Paginacao.de(pagina, tamanho));
         }
 
         @GetMapping("/{id}")
