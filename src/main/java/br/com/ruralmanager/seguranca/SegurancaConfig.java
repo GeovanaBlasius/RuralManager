@@ -54,7 +54,8 @@ public class SegurancaConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/cadastro",
-                                "/api/auth/esqueci-senha", "/api/auth/redefinir-senha").permitAll()
+                                "/api/auth/esqueci-senha", "/api/auth/redefinir-senha",
+                                "/api/auth/verificar-email", "/api/auth/reenviar-codigo").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll())

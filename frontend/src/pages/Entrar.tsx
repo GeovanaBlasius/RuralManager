@@ -3,10 +3,10 @@ import { api, ApiError } from '../api/client';
 import { useAuth } from '../auth';
 import { AvisoPrivacidade, CampoForm, CampoSenha, MensagemErro } from '../ui/componentes';
 
-type Modo = 'entrar' | 'cadastro' | 'esqueci' | 'redefinir';
+type Modo = 'entrar' | 'cadastro' | 'verificar' | 'esqueci' | 'redefinir';
 
 export function Entrar() {
-  const { entrar, cadastrar } = useAuth();
+  const { entrar, cadastrar, confirmarEmail } = useAuth();
   const [modo, setModo] = useState<Modo>('entrar');
   const [v, setV] = useState({ nome: '', cpf: '', telefone: '', email: '', senha: '', codigo: '', novaSenha: '' });
   const [erro, setErro] = useState<unknown>(null);
@@ -33,7 +33,15 @@ export function Entrar() {
       if (modo === 'entrar') {
         await entrar(v.email, v.senha);
       } else if (modo === 'cadastro') {
-        await cadastrar(v);
+        const r = await cadastrar(v);
+        if (r.verificacaoPendente) {
+          setModo('verificar');
+          setMensagem(r.emailEnviado
+            ? `Enviamos um código de 6 dígitos para ${r.email}. Ele vale por 15 minutos.`
+            : 'Sua conta foi criada, mas não conseguimos enviar o e-mail agora. Toque em "Reenviar código" em instantes.');
+        }
+      } else if (modo === 'verificar') {
+        await confirmarEmail(v.email, v.codigo);
       } else if (modo === 'esqueci') {
         await api.post('/api/auth/esqueci-senha', { email: v.email });
         setModo('redefinir');
@@ -44,8 +52,28 @@ export function Entrar() {
         setMensagem('Senha redefinida. Entre com a nova senha.');
       }
     } catch (err) {
+      if (modo === 'entrar' && err instanceof ApiError && err.codigo === 'EMAIL_NAO_VERIFICADO') {
+        // Senha certa, e-mail ainda não confirmado: leva direto para digitar o código.
+        setModo('verificar');
+        setMensagem('Falta confirmar seu e-mail. Digite o código de 6 dígitos que enviamos, ou peça um novo.');
+        return;
+      }
       setErro(err);
       if (err instanceof ApiError) setCampos(err.campos);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function reenviar() {
+    setErro(null);
+    setMensagem(null);
+    setEnviando(true);
+    try {
+      await api.post('/api/auth/reenviar-codigo', { email: v.email });
+      setMensagem('Pedido feito. Se houver uma conta aguardando confirmação nesse e-mail, enviamos um novo código.');
+    } catch (err) {
+      setErro(err);
     } finally {
       setEnviando(false);
     }
@@ -64,6 +92,7 @@ export function Entrar() {
         <form className="cartao" onSubmit={enviar}>
           <h2 style={{ marginBottom: 14 }}>
             {modo === 'entrar' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta'
+              : modo === 'verificar' ? 'Confirmar e-mail'
               : modo === 'esqueci' ? 'Recuperar senha' : 'Redefinir senha'}
           </h2>
           {modo === 'cadastro' && (
@@ -88,6 +117,12 @@ export function Entrar() {
                 autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} />
             </CampoForm>
           )}
+          {modo === 'verificar' && (
+            <CampoForm id="codigoVerif" rotulo="Código recebido por e-mail" erro={campos.codigo}>
+              <input id="codigoVerif" inputMode="numeric" autoComplete="one-time-code" value={v.codigo}
+                onChange={muda('codigo')} maxLength={6} required />
+            </CampoForm>
+          )}
           {modo === 'redefinir' && (
             <>
               <CampoForm id="codigo" rotulo="Código recebido por e-mail" erro={campos.codigo}>
@@ -102,6 +137,7 @@ export function Entrar() {
           <MensagemErro erro={erro} />
           <button className="btn cheio" type="submit" disabled={enviando}>
             {enviando ? 'Aguarde…' : modo === 'entrar' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta'
+              : modo === 'verificar' ? 'Confirmar e-mail'
               : modo === 'esqueci' ? 'Enviar código' : 'Redefinir senha'}
           </button>
         </form>
@@ -113,6 +149,12 @@ export function Entrar() {
             </>
           )}
           {modo === 'cadastro' && <button type="button" onClick={() => trocarModo('entrar')}>Já tenho conta</button>}
+          {modo === 'verificar' && (
+            <>
+              <button type="button" onClick={reenviar} disabled={enviando}>Reenviar código</button>
+              <button type="button" onClick={() => trocarModo('entrar')}>Voltar a entrar</button>
+            </>
+          )}
           {modo === 'esqueci' && <button type="button" onClick={() => trocarModo('entrar')}>Já lembrei, voltar a entrar</button>}
           {modo === 'redefinir' && (
             <>

@@ -3,7 +3,13 @@ package br.com.ruralmanager;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.ruralmanager.auth.AuthDtos.AuthResponse;
+import br.com.ruralmanager.auth.AuthDtos.CadastroRequest;
+import br.com.ruralmanager.auth.AuthDtos.CadastroResponse;
+import br.com.ruralmanager.auth.AuthDtos.ReenviarCodigoRequest;
+import br.com.ruralmanager.auth.AuthDtos.VerificarEmailRequest;
 import br.com.ruralmanager.auth.AuthDtos.EsqueciSenhaRequest;
+import java.util.Map;
+import org.mockito.Mockito;
 import br.com.ruralmanager.auth.AuthDtos.LoginRequest;
 import br.com.ruralmanager.auth.AuthDtos.RedefinirSenhaRequest;
 import br.com.ruralmanager.usuario.Usuario;
@@ -103,6 +109,98 @@ class AutenticacaoIT extends IntegrationTestBase {
 
         var loginComNova = post("/api/auth/login", null, new LoginRequest(email, "novaSenhaSegura1"), AuthResponse.class);
         assertThat(loginComNova.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    // ---- Verificacao de e-mail no cadastro ----
+
+    private org.springframework.http.ResponseEntity<CadastroResponse> cadastrarSemConfirmar(String email, String cpf) {
+        return post("/api/auth/cadastro", null,
+                new CadastroRequest("Pendente", cpf, null, email, "senhaSegura123"), CadastroResponse.class);
+    }
+
+    @Test
+    void cadastroNaoDaSessaoEExigeConfirmarOCodigoDoEmail() {
+        String email = "pendente." + System.nanoTime() + "@teste.com";
+        var cad = cadastrarSemConfirmar(email, novoCpf());
+        assertThat(cad.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(cad.getBody().verificacaoPendente()).isTrue();
+        assertThat(cad.getBody().emailEnviado()).isTrue();
+        assertThat(cad.getBody().sessao()).isNull();
+
+        // Senha certa, mas e-mail nao confirmado: 403 com um codigo que a tela entende.
+        var bloqueado = post("/api/auth/login", null, new LoginRequest(email, "senhaSegura123"), Map.class);
+        assertThat(bloqueado.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(bloqueado.getBody().get("codigo")).isEqualTo("EMAIL_NAO_VERIFICADO");
+
+        String certo = codigoEnviadoPara(email);
+        String errado = certo.equals("000000") ? "111111" : "000000";
+        assertThat(post("/api/auth/verificar-email", null, new VerificarEmailRequest(email, errado), Object.class)
+                .getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+
+        var ok = post("/api/auth/verificar-email", null, new VerificarEmailRequest(email, certo), AuthResponse.class);
+        assertThat(ok.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(ok.getBody().token()).isNotBlank();
+
+        assertThat(post("/api/auth/login", null, new LoginRequest(email, "senhaSegura123"), AuthResponse.class)
+                .getStatusCode()).isEqualTo(HttpStatus.OK);
+        // O codigo e de uso unico.
+        assertThat(post("/api/auth/verificar-email", null, new VerificarEmailRequest(email, certo), Object.class)
+                .getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void codigoDeVerificacaoExpiradoNaoServe() {
+        String email = "vencido." + System.nanoTime() + "@teste.com";
+        cadastrarSemConfirmar(email, novoCpf());
+        Usuario u = usuarios.findByEmailIgnoreCase(email).orElseThrow();
+        u.exigirVerificacao(encoder.encode("123456"), LocalDateTime.now().minusMinutes(1));
+        usuarios.save(u);
+        assertThat(post("/api/auth/verificar-email", null, new VerificarEmailRequest(email, "123456"), Object.class)
+                .getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void reenviarGeraCodigoNovoEOAntigoDeixaDeValer() {
+        String email = "reenvia." + System.nanoTime() + "@teste.com";
+        cadastrarSemConfirmar(email, novoCpf());
+        Usuario u = usuarios.findByEmailIgnoreCase(email).orElseThrow();
+        u.exigirVerificacao(encoder.encode("111111"), LocalDateTime.now().plusMinutes(15));
+        usuarios.save(u);
+
+        assertThat(post("/api/auth/reenviar-codigo", null, new ReenviarCodigoRequest(email), Void.class).getStatusCode())
+                .isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(post("/api/auth/verificar-email", null, new VerificarEmailRequest(email, "111111"), Object.class)
+                .getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(post("/api/auth/verificar-email", null,
+                new VerificarEmailRequest(email, codigoEnviadoPara(email)), AuthResponse.class).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void cadastroPendenteNaoSegueCpfNemEmailDeOutraPessoa() {
+        String email = "ocupado." + System.nanoTime() + "@teste.com";
+        String cpf = novoCpf();
+        cadastrarSemConfirmar(email, cpf);          // alguem "ocupou" CPF e e-mail sem confirmar
+
+        // O dono de verdade se cadastra com o mesmo CPF e e-mail: o pendente e substituido.
+        var dono = cadastrarSemConfirmar(email, cpf);
+        assertThat(dono.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(post("/api/auth/verificar-email", null,
+                new VerificarEmailRequest(email, codigoEnviadoPara(email)), AuthResponse.class).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+
+        // Ja confirmado, ninguem mais consegue tomar o lugar.
+        assertThat(cadastrarSemConfirmar(email, novoCpf()).getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void semEnvioDeEmailConfiguradoOCadastroEARecuperacaoFalamAVerdade() {
+        Mockito.when(emailFalso.disponivel()).thenReturn(false);
+        String email = "sememail." + System.nanoTime() + "@teste.com";
+        assertThat(cadastrarSemConfirmar(email, novoCpf()).getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(usuarios.findByEmailIgnoreCase(email)).isEmpty(); // nao cria conta que ninguem consegue ativar
+        assertThat(post("/api/auth/esqueci-senha", null, new EsqueciSenhaRequest(email), Object.class).getStatusCode())
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @Test

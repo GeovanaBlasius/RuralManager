@@ -19,10 +19,15 @@ services:
         value: "480"
       - key: RM_CORS_ORIGENS
         value: "https://ruralmanager-web-w8cf.onrender.com"
+      # Obrigatoria: sem ela nao sai e-mail e o cadastro novo (com verificacao) e a recuperacao de senha ficam indisponiveis.
       - key: RM_RESEND_API_KEY
         sync: false
+      # Troque pelo remetente de um dominio verificado no Resend. O padrao (onboarding@resend.dev)
+      # so entrega para o e-mail dono da conta Resend.
       - key: RM_EMAIL_REMETENTE
         value: "RuralManager <onboarding@resend.dev>"
+      - key: RM_EXIGIR_VERIFICACAO_EMAIL
+        value: "true"
       - key: RM_ADMIN_EMAIL
         sync: false
       - key: RM_ADMIN_SENHA

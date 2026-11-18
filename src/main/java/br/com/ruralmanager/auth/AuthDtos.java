@@ -35,6 +35,24 @@ public final class AuthDtos {
     public record AuthResponse(String token, String tipo, long expiraEmSegundos, UsuarioResumo usuario) {
     }
 
+    /**
+     * Resposta do cadastro. Com verificacao de e-mail ligada, {@code sessao} vem nula e a pessoa so
+     * entra depois de confirmar o codigo. {@code emailEnviado} diz a verdade sobre o envio.
+     */
+    public record CadastroResponse(String email, boolean verificacaoPendente, boolean emailEnviado,
+                                   AuthResponse sessao) {
+    }
+
+    public record VerificarEmailRequest(
+            @NotBlank(message = "Informe o e-mail") @Email(message = "E-mail invalido") String email,
+            @NotBlank(message = "Informe o codigo recebido por e-mail")
+            @Size(min = 6, max = 6, message = "O codigo tem 6 digitos") String codigo) {
+    }
+
+    public record ReenviarCodigoRequest(
+            @NotBlank(message = "Informe o e-mail") @Email(message = "E-mail invalido") String email) {
+    }
+
     public record EsqueciSenhaRequest(
             @NotBlank(message = "Informe o e-mail") @Email(message = "E-mail invalido") String email) {
     }

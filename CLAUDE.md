@@ -11,16 +11,15 @@ Contexto completo: `docs/CONTEXTO.md`. Material da disciplina: `docs/academico/`
 - Pacote Java: `br.com.ruralmanager` (nomes de domínio em português; manter).
 
 ## ESTADO REAL (leia primeiro)
-- **O Java NUNCA foi compilado** (o ambiente onde foi escrito não alcançava o Maven Central). Só foi checado sintaxe com `javac`. Espere alguns erros de compilação/import/anotação.
-- Verificado de verdade: SQL no Supabase (testes com rollback), TypeScript (`tsc`, `vite build`, vitest 5/5, Playwright sem erros de console), `Documentos` (CPF/CNPJ) executado isoladamente.
-- Testes Java escritos mas nunca rodados: `src/test/java/...` (Documentos, Datas, Safra, RelatorioCalculos).
+- O Java compila e roda. `mvn test` (precisa do Docker ligado) executa testes unitários e de integração com Testcontainers/Postgres real: isolamento entre produtores, estoque e concorrência, regras de data, login/recuperação/verificação de e-mail, perfis, contrato do relatório e carga de demonstração.
+- Migrations `V1..V12` existem; o Flyway aplica as novas na subida da API (V9 em diante já foram aplicadas no Supabase).
+- Frontend: `tsc`, `vite build` e vitest passam. Regras de negócio documentadas em `docs/REGRAS.md`.
+- Cadastro novo exige confirmar código de 6 dígitos por e-mail (`RM_EXIGIR_VERIFICACAO_EMAIL`, padrão true); sem `RM_RESEND_API_KEY` o cadastro e a recuperação respondem 503. Nos testes, `EmailServico` é substituído por um falso que expõe o código enviado (`codigoEnviadoPara`).
 
-## Primeiras tarefas
-1. `mvn -q compile` → corrigir tudo que aparecer (sem mudar regras de negócio).
-2. `mvn test` → corrigir testes/código.
-3. Criar `.env` a partir de `.env.example` (RM_DB_URL/RM_DB_PASSWORD do Supabase; `RM_JWT_SECRET` com 32+ chars). Rodar `mvn spring-boot:run`; testar `/actuator/health/readiness`.
-4. Subir o front: `cd frontend && npm i && npm run dev` (proxy `/api` → :8080). Fluxo: cadastro → safra → cultura → colheita → gasto → venda → painel.
-5. Escrever testes de integração (Testcontainers/Postgres) para: isolamento entre produtores (404 em recurso alheio), estoque (vendido+destinado ≤ colhido) e concorrência de vendas.
+## Como trabalhar
+1. `mvn test` e `cd frontend && npm run build && npm test` antes de cada commit.
+2. `.env` a partir de `.env.example` (nunca commitar). Rodar `mvn spring-boot:run`; testar `/actuator/health/readiness`.
+3. Front: `cd frontend && npm i && npm run dev` (proxy `/api` → :8080).
 
 ## Regras que não podem quebrar
 - Produtor vem **somente do JWT**; todo repositório filtra por dono; recurso de outro produtor responde **404**, nunca 403.

@@ -25,8 +25,19 @@ public class AuthController {
 
     @PostMapping("/cadastro")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse cadastro(@Valid @RequestBody CadastroRequest req) {
+    public CadastroResponse cadastro(@Valid @RequestBody CadastroRequest req) {
         return servico.cadastrar(req);
+    }
+
+    @PostMapping("/verificar-email")
+    public AuthResponse verificarEmail(@Valid @RequestBody VerificarEmailRequest req) {
+        return servico.verificarEmail(req);
+    }
+
+    @PostMapping("/reenviar-codigo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reenviarCodigo(@Valid @RequestBody ReenviarCodigoRequest req) {
+        servico.reenviarCodigo(req);
     }
 
     @PostMapping("/login")

@@ -56,6 +56,8 @@ rm:
   email:
     resend-api-key: ${RM_RESEND_API_KEY:}   # resend.com > API Keys. Em branco, o e-mail so vai pro log.
     remetente: "${RM_EMAIL_REMETENTE:RuralManager <onboarding@resend.dev>}"
+    # true: cadastro novo so entra apos confirmar o codigo de 6 digitos enviado por e-mail (exige a chave do Resend).
+    exigir-verificacao: ${RM_EXIGIR_VERIFICACAO_EMAIL:true}
 
 management:
   endpoints:

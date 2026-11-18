@@ -19,6 +19,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
      */
     Optional<Usuario> findByEmailIgnoreCase(String email);
 
+    /** Cadastros que nunca confirmaram o e-mail e que ocupam este e-mail ou este CPF. */
+    List<Usuario> findByEmailIgnoreCaseAndEmailVerificadoFalse(String email);
+
+    List<Usuario> findByProdutor_CpfAndEmailVerificadoFalse(String cpf);
+
     boolean existsByEmailIgnoreCase(String email);
 
     /** Usuarios de um produtor. Usado na tela de gestao de acessos. */

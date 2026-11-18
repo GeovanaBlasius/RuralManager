@@ -13,6 +13,13 @@ export interface AuthResponse {
   usuario: import('./sessao').Usuario;
 }
 
+export interface CadastroResponse {
+  email: string;
+  verificacaoPendente: boolean;
+  emailEnviado: boolean;
+  sessao: AuthResponse | null;
+}
+
 export interface Item { id: number; nome: string }
 export interface Unidade { id: number; nome: string; sigla: string; fatorKg: number | null }
 

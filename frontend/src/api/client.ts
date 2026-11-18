@@ -10,6 +10,7 @@ export class ApiError extends Error {
     public status: number,
     message: string,
     public campos: Record<string, string> = {},
+    public codigo?: string,
   ) {
     super(message);
   }
@@ -18,6 +19,8 @@ export class ApiError extends Error {
 interface Problema {
   detail?: string;
   campos?: Record<string, string>;
+  /** Código de erro de negócio que a tela entende, ex.: EMAIL_NAO_VERIFICADO. */
+  codigo?: string;
 }
 
 async function request<T>(metodo: string, caminho: string, corpo?: unknown): Promise<T> {
@@ -53,6 +56,7 @@ async function request<T>(metodo: string, caminho: string, corpo?: unknown): Pro
       resposta.status,
       p.detail ?? mensagemPadrao(resposta.status),
       p.campos ?? {},
+      p.codigo,
     );
   }
   return json as T;

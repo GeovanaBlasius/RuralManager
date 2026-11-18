@@ -2,8 +2,19 @@ package br.com.ruralmanager;
 
 import br.com.ruralmanager.auth.AuthDtos.AuthResponse;
 import br.com.ruralmanager.auth.AuthDtos.CadastroRequest;
+import br.com.ruralmanager.auth.AuthDtos.CadastroResponse;
 import br.com.ruralmanager.auth.AuthDtos.LoginRequest;
+import br.com.ruralmanager.auth.AuthDtos.VerificarEmailRequest;
+import br.com.ruralmanager.email.EmailServico;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -47,6 +58,39 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected TestRestTemplate rest;
 
+    /**
+     * O e-mail nunca sai de verdade nos testes: o servico e trocado por um falso que guarda o ultimo
+     * codigo de 6 digitos "enviado" para cada endereco, como se lessemos a caixa de entrada.
+     */
+    @MockBean
+    protected EmailServico emailFalso;
+
+    private static final Map<String, String> CODIGOS_ENVIADOS = new ConcurrentHashMap<>();
+    private static final Pattern CODIGO = Pattern.compile(">(\\d{6})<");
+
+    @BeforeEach
+    void prepararEmailFalso() {
+        Mockito.when(emailFalso.disponivel()).thenReturn(true);
+        Mockito.when(emailFalso.enviar(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+                        ArgumentMatchers.anyString()))
+                .thenAnswer(inv -> {
+                    Matcher m = CODIGO.matcher(inv.<String>getArgument(2));
+                    if (m.find()) {
+                        CODIGOS_ENVIADOS.put(inv.<String>getArgument(0).toLowerCase(), m.group(1));
+                    }
+                    return true;
+                });
+    }
+
+    /** Ultimo codigo enviado por e-mail para o endereco (cadastro ou recuperacao). */
+    protected String codigoEnviadoPara(String email) {
+        String codigo = CODIGOS_ENVIADOS.get(email.toLowerCase());
+        if (codigo == null) {
+            throw new IllegalStateException("Nenhum e-mail com codigo foi enviado para " + email);
+        }
+        return codigo;
+    }
+
     /** Sessao de um usuario autenticado: token pronto para as chamadas seguintes. */
     protected record Sessao(String token, Long usuarioId, Long produtorId) {
     }
@@ -70,14 +114,24 @@ public abstract class IntegrationTestBase {
         return resto == 10 ? 0 : resto;
     }
 
-    /** O CPF do parametro e ignorado: cada cadastro usa um novo, para os testes nao colidirem no mesmo banco. */
+    /**
+     * Cadastra e, como a verificacao de e-mail esta ligada, confirma o codigo "recebido" por e-mail.
+     * O CPF do parametro e ignorado: cada cadastro usa um novo, para os testes nao colidirem no mesmo banco.
+     */
     protected Sessao cadastrar(String nome, String cpfIgnorado, String email, String senha) {
         var resp = rest.postForEntity(
-                "/api/auth/cadastro", new CadastroRequest(nome, novoCpf(), null, email, senha), AuthResponse.class);
-        if (resp.getBody() == null || resp.getBody().usuario() == null) {
+                "/api/auth/cadastro", new CadastroRequest(nome, novoCpf(), null, email, senha), CadastroResponse.class);
+        if (resp.getBody() == null) {
             throw new IllegalStateException("Cadastro falhou: HTTP " + resp.getStatusCode());
         }
-        AuthResponse corpo = resp.getBody();
+        AuthResponse corpo = resp.getBody().sessao();
+        if (resp.getBody().verificacaoPendente()) {
+            corpo = rest.postForObject("/api/auth/verificar-email",
+                    new VerificarEmailRequest(email, codigoEnviadoPara(email)), AuthResponse.class);
+        }
+        if (corpo == null || corpo.usuario() == null) {
+            throw new IllegalStateException("Cadastro falhou: HTTP " + resp.getStatusCode());
+        }
         return new Sessao(corpo.token(), corpo.usuario().id(), corpo.usuario().produtorId());
     }
 

@@ -146,8 +146,10 @@ Testes: `mvn test` (API) e `cd frontend && npm test`.
 | RM_JWT_MINUTOS | validade do token (padrão 480) |
 | RM_CORS_ORIGENS | origens do front, separadas por vírgula |
 | RM_OPENAPI | `true` liga o Swagger em `/swagger-ui.html` (recurso de API docs; `/v3/api-docs` e `/swagger-ui/**` exigem login) |
-| RM_RESEND_API_KEY | chave da API do [Resend](https://resend.com) para o e-mail de recuperação de senha; em branco, só registra no log |
-| RM_EMAIL_REMETENTE | remetente dos e-mails, ex. `RuralManager <onboarding@resend.dev>` |
+| RM_RESEND_API_KEY | chave da API do [Resend](https://resend.com), usada no código de confirmação do cadastro e na recuperação de senha. **Sem ela nenhum e-mail sai**: o cadastro (com verificação ligada) e a recuperação respondem 503 com mensagem clara, em vez de dizer que enviaram. O log avisa na subida |
+| RM_EMAIL_REMETENTE | remetente dos e-mails. O padrão `onboarding@resend.dev` **só entrega para o e-mail dono da conta Resend**; para enviar a qualquer pessoa, verifique um domínio no Resend (Domains) e use um remetente dele, ex. `RuralManager <contato@seudominio.com.br>` |
+| RM_EXIGIR_VERIFICACAO_EMAIL | padrão `true`: cadastro novo só entra depois de digitar o código de 6 dígitos enviado ao e-mail. `false` desliga (útil só em desenvolvimento sem chave do Resend) |
+| RM_DEMO_HABILITADO | padrão `false`: `true` libera o botão que carrega os dados de exemplo do trabalho (só dev/demonstração) |
 | RM_ADMIN_EMAIL / RM_ADMIN_SENHA | cria o administrador inicial na subida (senha com 12+ caracteres); em branco, nenhum é criado |
 
 ## Deploy
@@ -168,6 +170,10 @@ Em qualquer outra hospedagem separada (front e API em domínios diferentes), bui
 ## Segurança
 
 JWT stateless, BCrypt(12), CPF/CNPJ validados por dígito verificador, isolamento completo entre produtores (toda consulta já sai filtrada pelo dono; acessar um registro de outro produtor devolve 404, nunca um dado alheio), travas de linha no estoque para evitar venda duplicada em corrida, limitador de tentativas de login e de código de recuperação de senha, erros devolvidos em formato padrão (ProblemDetail) sem vazar detalhe interno.
+
+**Confirmação de e-mail:** o cadastro cria a conta pendente e envia um código de 6 dígitos (válido por 15 minutos, guardado só como hash BCrypt). Sem confirmar, o login responde 403 (`EMAIL_NAO_VERIFICADO`) e a tela leva à digitação do código, com opção de reenviar. Cadastro pendente não segura CPF nem e-mail: um novo cadastro com os mesmos dados o substitui, então ninguém "ocupa" o CPF de outra pessoa sem acesso à caixa de entrada dela. Contas criadas antes desta mudança ficam como confirmadas; operadores criados pelo produtor titular também.
+
+**Onde fica o token:** o JWT fica em `localStorage` (a sessão sobrevive a recarregar a página e funciona no PWA offline). O risco conhecido é que um XSS poderia ler o token; por isso o `nginx` serve o front com Content-Security-Policy restritiva (`default-src 'self'`, sem scripts de terceiros, `frame-ancestors 'none'`), o React escapa o conteúdo por padrão, a validade do token é de 8 h e não há `dangerouslySetInnerHTML` no código. A alternativa (cookie `HttpOnly` + proteção CSRF) exige API e front no mesmo site; como no Render gratuito são domínios diferentes, a escolha foi manter o `localStorage` com essas mitigações. Se um dia API e front passarem a compartilhar domínio, migrar para cookie `HttpOnly; Secure; SameSite=Strict` é o caminho.
 
 Testado ativamente contra isolamento entre contas, token forjado ou adulterado, escalada de privilégio entre papéis (Operador/Produtor/Admin), força bruta de login e injeção SQL/XSS: nenhum desses ataques teve sucesso. Detalhes e metodologia na [release mais recente](../../releases/latest).
 

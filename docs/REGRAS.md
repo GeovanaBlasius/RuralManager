@@ -51,6 +51,7 @@ só pelo serviço (`GastoServico.vinculos`); agora o banco também garante.
 | RN26 | Cliente: CPF/CNPJ único e validado quanto ao formato | `uk_cliente_documento`, `ck_cliente_documento` (V6) | `Documentos.cpfOuCnpjValido`, `ClienteServico.documento` | ✅ `DocumentosTest` |
 | RN27 | Fatura: data da compra não futura | sem CHECK (regra de serviço) | `FaturaServico.criar` | ❌ |
 | RN28 | Item da fatura: quantidade e preço unitário > 0 | `ck_item_quantidade`, `ck_item_preco` (V6) | — | ❌ |
+| RN29 (do sistema, não do enunciado) | Cadastro novo só entra após confirmar o código de 6 dígitos enviado ao e-mail; cadastro pendente não segura CPF nem e-mail | colunas `email_verificado`, `codigo_verificacao_*` (V12) | `AuthService.cadastrar/verificarEmail/reenviarCodigo` | ✅ `AutenticacaoIT` |
 
 ### Diferença proposital da RN26 em relação ao enunciado
 
@@ -63,7 +64,7 @@ seguida das demais diferenças de schema, listadas no README.
 
 ## Cobertura de testes
 
-Suíte atual: 17 testes unitários (`Documentos`, `Datas`, `Safra`, `RelatorioCalculos`) e 27 de
+Suíte atual: 17 testes unitários (`Documentos`, `Datas`, `Safra`, `RelatorioCalculos`) e 35 de
 integração com Testcontainers/Postgres real (`*IT`): isolamento entre produtores
 (`IsolamentoEntreProdutoresIT`), estoque e venda concorrente (`EstoqueEConcorrenciaIT`),
 regras de data (`RegrasDeDataIT`), login, recuperação de senha e limitador de tentativas

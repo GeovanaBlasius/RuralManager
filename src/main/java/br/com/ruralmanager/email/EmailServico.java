@@ -10,10 +10,13 @@ import org.springframework.web.client.RestClient;
 /**
  * Envio de e-mail transacional via Resend (resend.com).
  *
- * Sem chave configurada, so registra no log em vez de falhar: isso deixa o
- * resto do sistema (cadastro, recuperacao de senha) funcionando mesmo antes
- * de configurar o envio de e-mail. Falha de envio tambem so vai pro log --
- * nunca pro cliente, para nao revelar se o e-mail existe nem detalhe interno.
+ * Quem chama precisa saber se o e-mail saiu de verdade: {@link #disponivel()} diz se ha chave
+ * configurada e {@link #enviar} devolve true so quando o Resend aceitou a mensagem. Os detalhes
+ * de uma falha ficam no log, nunca na resposta ao cliente.
+ *
+ * Atencao: com o remetente de teste (onboarding@resend.dev) o Resend so entrega para o e-mail
+ * dono da conta. Para enviar a qualquer pessoa e preciso verificar um dominio no painel do Resend
+ * e usar um remetente desse dominio em RM_EMAIL_REMETENTE.
  */
 @Service
 @EnableConfigurationProperties(PropriedadesEmail.class)
@@ -33,12 +36,25 @@ public class EmailServico {
                 .baseUrl("https://api.resend.com")
                 .defaultHeader("Authorization", "Bearer " + (habilitado ? props.resendApiKey() : ""))
                 .build();
+        if (!habilitado) {
+            log.warn("RM_RESEND_API_KEY nao configurada: nenhum e-mail sera enviado "
+                    + "(cadastro com verificacao e recuperacao de senha ficam indisponiveis).");
+        } else if (this.remetente.contains("onboarding@resend.dev")) {
+            log.warn("Remetente de teste do Resend em uso: so e entregue ao e-mail dono da conta Resend. "
+                    + "Verifique um dominio e ajuste RM_EMAIL_REMETENTE.");
+        }
     }
 
-    public void enviar(String destinatario, String assunto, String corpoHtml) {
+    /** Ha chave do Resend configurada? Sem ela, nenhum e-mail sai. */
+    public boolean disponivel() {
+        return habilitado;
+    }
+
+    /** @return true se o Resend aceitou o envio; false se nao ha chave ou o envio falhou. */
+    public boolean enviar(String destinatario, String assunto, String corpoHtml) {
         if (!habilitado) {
-            log.warn("RM_RESEND_API_KEY nao configurada; e-mail para {} nao foi enviado.", destinatario);
-            return;
+            log.warn("RM_RESEND_API_KEY nao configurada; e-mail '{}' para {} NAO foi enviado.", assunto, destinatario);
+            return false;
         }
         try {
             restClient.post()
@@ -46,8 +62,10 @@ public class EmailServico {
                     .body(Map.of("from", remetente, "to", destinatario, "subject", assunto, "html", corpoHtml))
                     .retrieve()
                     .toBodilessEntity();
+            return true;
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail via Resend para {}", destinatario, e);
+            return false;
         }
     }
 }

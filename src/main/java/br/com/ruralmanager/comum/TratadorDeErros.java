@@ -40,6 +40,18 @@ public class TratadorDeErros {
         return problema(HttpStatus.FORBIDDEN, "Acesso negado", e.getMessage());
     }
 
+    @ExceptionHandler(ServicoIndisponivelException.class)
+    ProblemDetail indisponivel(ServicoIndisponivelException e) {
+        return problema(HttpStatus.SERVICE_UNAVAILABLE, "Servico indisponivel", e.getMessage());
+    }
+
+    @ExceptionHandler(EmailNaoVerificadoException.class)
+    ProblemDetail emailNaoVerificado(EmailNaoVerificadoException e) {
+        ProblemDetail p = problema(HttpStatus.FORBIDDEN, "E-mail nao confirmado", e.getMessage());
+        p.setProperty("codigo", "EMAIL_NAO_VERIFICADO");
+        return p;
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     ProblemDetail credenciais(BadCredentialsException e) {
         return problema(HttpStatus.UNAUTHORIZED, "Nao autorizado", e.getMessage());

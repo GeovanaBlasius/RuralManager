@@ -86,6 +86,16 @@ public class Usuario extends EntidadeAuditavel {
     @Column(name = "codigo_recuperacao_expira")
     private LocalDateTime codigoRecuperacaoExpira;
 
+    /** Falso so enquanto um cadastro novo ainda nao confirmou o codigo enviado por e-mail. */
+    @Column(name = "email_verificado", nullable = false)
+    private boolean emailVerificado = true;
+
+    @Column(name = "codigo_verificacao_hash", length = 100)
+    private String codigoVerificacaoHash;
+
+    @Column(name = "codigo_verificacao_expira")
+    private LocalDateTime codigoVerificacaoExpira;
+
     /** Construtor exigido pelo JPA. */
     protected Usuario() {
     }
@@ -203,6 +213,31 @@ public class Usuario extends EntidadeAuditavel {
     public void limparCodigoRecuperacao() {
         this.codigoRecuperacaoHash = null;
         this.codigoRecuperacaoExpira = null;
+    }
+
+    public boolean isEmailVerificado() {
+        return emailVerificado;
+    }
+
+    public String getCodigoVerificacaoHash() {
+        return codigoVerificacaoHash;
+    }
+
+    public LocalDateTime getCodigoVerificacaoExpira() {
+        return codigoVerificacaoExpira;
+    }
+
+    /** Marca o e-mail como pendente de confirmacao e guarda o hash do codigo enviado. */
+    public void exigirVerificacao(String hash, LocalDateTime expira) {
+        this.emailVerificado = false;
+        this.codigoVerificacaoHash = hash;
+        this.codigoVerificacaoExpira = expira;
+    }
+
+    public void confirmarEmail() {
+        this.emailVerificado = true;
+        this.codigoVerificacaoHash = null;
+        this.codigoVerificacaoExpira = null;
     }
 
     @Override
