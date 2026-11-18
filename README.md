@@ -7,6 +7,8 @@ Gestão agrícola para pequenos e médios produtores: safras, culturas, colheita
 ## Sumário
 
 - [Sobre o projeto](#sobre-o-projeto)
+- [Modelo de dados](#modelo-de-dados)
+- [Regras de negócio](#regras-de-negócio)
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias](#tecnologias)
 - [Capturas de tela](#capturas-de-tela)
@@ -19,6 +21,82 @@ Gestão agrícola para pequenos e médios produtores: safras, culturas, colheita
 ## Sobre o projeto
 
 Começou como o trabalho final de Programação Orientada a Objetos I no IFC Campus Rio do Sul, em Java puro com DAO e MySQL (essa versão fica arquivada, só para referência). Depois foi reescrito do zero como produto completo: API em Spring Boot, frontend em React, banco Postgres, autenticação própria, pensado desde o início para uso real por produtores rurais, não só como exercício acadêmico.
+
+O modelo de dados em si vem de um trabalho anterior, de **Banco de Dados I** (mesmo curso, com Davi Bianchi Ayres), que fez a modelagem conceitual completa a partir do cenário de produtores rurais — ver `docs/academico/`.
+
+## Modelo de dados
+
+Treze entidades e treze relacionamentos, com duas entidades associativas (Cultura liga Safra e Produto; Item da Fatura liga Fatura e Colheita):
+
+```mermaid
+erDiagram
+    PRODUTOR ||--o{ SAFRA : possui
+    SAFRA ||--o{ CULTURA : contem
+    PRODUTO ||--o{ CULTURA : "e o produto de"
+    SAFRA ||--o{ GASTO : acumula
+    CULTURA ||--o{ GASTO : "classifica (opcional)"
+    CULTURA ||--o{ COLHEITA : produz
+    UNIDADE_MEDIDA ||--o{ COLHEITA : mede
+    CATEGORIA ||--o{ GASTO : classifica
+    COLHEITA ||--o{ GASTO : "classifica (opcional)"
+    COLHEITA ||--o{ ITEM_FATURA : vende
+    COLHEITA ||--o{ SAIDA : destina
+    DESTINO ||--o{ SAIDA : classifica
+    CLIENTE ||--o{ FATURA : realiza
+    FATURA ||--o{ ITEM_FATURA : contem
+
+    PRODUTOR {
+        string cpf
+        string nome
+    }
+    SAFRA {
+        int ano_inicio
+        int ano_fim
+    }
+    CULTURA {
+        string variedade
+        decimal area_ha
+        date data_plantio
+    }
+    COLHEITA {
+        decimal quantidade
+        date data_colheita
+    }
+    GASTO {
+        string descricao
+        decimal valor
+        date data_gasto
+    }
+    SAIDA {
+        decimal quantidade
+        date data_saida
+    }
+    CLIENTE {
+        string nome
+        string cpf_cnpj
+    }
+    FATURA {
+        date data_compra
+    }
+    ITEM_FATURA {
+        decimal quantidade
+        decimal preco_unitario
+    }
+```
+
+### Diferenças em relação ao trabalho de Banco de Dados
+
+- **Postgres no lugar de MySQL** (Supabase), com `IDENTITY`/`NUMERIC` em vez de `AUTO_INCREMENT`/`DECIMAL` e `CHECK` com regex (`~`) para validar formato de CPF/CNPJ.
+- **Tabelas `usuario` e `chamado_suporte`** não existiam no modelo acadêmico: a aplicação real precisa de login (e mais de uma pessoa pode lançar dados na mesma conta) e de um canal de suporte.
+- **`produtor_id` em toda tabela de dono** (`cultura`, `gasto`, `cliente` etc. chegam lá por meio da safra ou direto): o trabalho modelou um produtor só; a aplicação é multi-tenant, cada produtor isolado dos demais.
+- **CPF/CNPJ do cliente único por produtor**, não globalmente como no enunciado (ver nota na RN26 de `docs/REGRAS.md`).
+- **Regras que o MySQL faria por gatilho (trigger) foram para a camada de serviço Java** — o Postgres deste projeto não usa gatilhos de propósito; o que dá para expressar como `CHECK`/`UNIQUE`/chave estrangeira (inclusive as compostas do enunciado) está no banco, o resto é validado em `GastoServico`, `FaturaServico` e afins.
+
+## Regras de negócio
+
+Mapa completo, regra a regra: do enunciado do trabalho de Banco de Dados (RN01 em diante)
+até a migração ou classe Java que garante cada uma hoje, e o teste que cobre (ou ainda não
+cobre) cada uma. [`docs/REGRAS.md`](docs/REGRAS.md).
 
 ## Funcionalidades
 
