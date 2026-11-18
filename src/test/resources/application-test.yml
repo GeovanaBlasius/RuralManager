@@ -1,0 +1,11 @@
+# Perfil usado pelos testes de integracao (Testcontainers). O datasource real
+# vem do container via @ServiceConnection; aqui so o que nao tem valor
+# padrao no application.yml principal.
+rm:
+  seguranca:
+    jwt-secret: "segredo-apenas-para-teste-de-integracao-0123456789"
+    jwt-expiracao-minutos: 480
+    cors-origens: http://localhost:5173
+  email:
+    resend-api-key: ""
+    remetente: "RuralManager <onboarding@resend.dev>"
