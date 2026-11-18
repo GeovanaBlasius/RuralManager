@@ -522,7 +522,7 @@ public class ConnectionFactory {
                 db.url=jdbc:mysql://localhost:3306/ruralmanager?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
                 db.baseurl=jdbc:mysql://localhost:3306/
                 db.user=root
-                db.password=30112005
+                db.password=CHANGE_ME
                 db.name=ruralmanager
                 
                 # Configurações da Aplicação
