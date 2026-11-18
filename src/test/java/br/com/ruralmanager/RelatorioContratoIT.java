@@ -27,13 +27,7 @@ class RelatorioContratoIT extends IntegrationTestBase {
         var produtor = cadastrar("Produtor Relatorio", "93541134780", "relatorio." + System.nanoTime() + "@teste.com", "senhaSegura123");
         Long produtoId = criarCatalogoSimples("/api/produtos", produtor.token(), "Soja-" + System.nanoTime());
         Long categoriaId = criarCatalogoSimples("/api/categorias-gasto", produtor.token(), "Sementes-" + System.nanoTime());
-        record UnidadeReq(String nome, String sigla, BigDecimal fatorKg) {
-        }
-        record UnidadeResp(Long id) {
-        }
-        Long unidadeId = post("/api/unidades", produtor.token(),
-                new UnidadeReq("Saca 60 kg " + System.nanoTime(), "s" + (System.nanoTime() % 1000), new BigDecimal("60")),
-                UnidadeResp.class).getBody().id();
+        Long unidadeId = criarUnidade(produtor.token(), "60");
 
         int ano = LocalDate.now().getYear() - 2;
         LocalDate plantio = LocalDate.of(ano, 10, 10);

@@ -49,12 +49,7 @@ class IsolamentoEntreProdutoresIT extends IntegrationTestBase {
 
         produtoId = criarCatalogoSimples("/api/produtos", a.token(), "Soja-" + System.nanoTime());
         categoriaId = criarCatalogoSimples("/api/categorias-gasto", a.token(), "Sementes-" + System.nanoTime());
-        record UnidadeReq(String nome, String sigla, BigDecimal fatorKg) {
-        }
-        record UnidadeResp(Long id) {
-        }
-        unidadeId = post("/api/unidades", a.token(), new UnidadeReq("Saca-" + System.nanoTime(), "sc" + (System.nanoTime() % 1000), new BigDecimal("60")), UnidadeResp.class)
-                .getBody().id();
+        unidadeId = criarUnidade(a.token(), "60");
 
         safraId = post("/api/safras", a.token(), new SafraRequest(2026, 2027, null), SafraResponse.class).getBody().id();
         culturaId = post("/api/culturas", a.token(),

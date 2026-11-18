@@ -36,13 +36,7 @@ class RegrasDeDataIT extends IntegrationTestBase {
     void montarBase() {
         produtor = cadastrar("Produtor Datas", "03848335603", "datas." + System.nanoTime() + "@teste.com", "senhaSegura123");
         produtoId = criarCatalogoSimples("/api/produtos", produtor.token(), "Trigo-" + System.nanoTime());
-        record UnidadeReq(String nome, String sigla, BigDecimal fatorKg) {
-        }
-        record UnidadeResp(Long id) {
-        }
-        unidadeId = post("/api/unidades", produtor.token(),
-                new UnidadeReq("Ton-" + System.nanoTime(), "t" + (System.nanoTime() % 1000), new BigDecimal("1000")),
-                UnidadeResp.class).getBody().id();
+        unidadeId = criarUnidade(produtor.token(), "60");
         // Safra fechada no ano passado e no retrasado, para poder testar "fora do periodo" nos dois sentidos.
         int anoPassado = LocalDate.now().getYear() - 2;
         safraId = post("/api/safras", produtor.token(), new SafraRequest(anoPassado, anoPassado + 1, null), SafraResponse.class)

@@ -47,13 +47,7 @@ class EstoqueEConcorrenciaIT extends IntegrationTestBase {
         produtor = cadastrar("Produtor Estoque", "93541134780", "estoque." + System.nanoTime() + "@teste.com", "senhaSegura123");
         Long produtoId = criarCatalogoSimples("/api/produtos", produtor.token(), "Milho-" + System.nanoTime());
         destinoId = criarCatalogoSimples("/api/destinos", produtor.token(), "Consumo-" + System.nanoTime());
-        record UnidadeReq(String nome, String sigla, BigDecimal fatorKg) {
-        }
-        record UnidadeResp(Long id) {
-        }
-        Long unidadeId = post("/api/unidades", produtor.token(),
-                new UnidadeReq("Saca-" + System.nanoTime(), "u" + (System.nanoTime() % 1000), new BigDecimal("60")),
-                UnidadeResp.class).getBody().id();
+        Long unidadeId = criarUnidade(produtor.token(), "60");
 
         Long safraId = post("/api/safras", produtor.token(), new SafraRequest(2026, 2027, null), SafraResponse.class).getBody().id();
         Long culturaId = post("/api/culturas", produtor.token(),

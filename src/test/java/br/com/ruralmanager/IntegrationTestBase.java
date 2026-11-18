@@ -111,6 +111,19 @@ public abstract class IntegrationTestBase {
         return rest.exchange(path, HttpMethod.DELETE, new HttpEntity<>(authHeaders(token)), Void.class);
     }
 
+    private static final AtomicLong SEQUENCIA_UNIDADE = new AtomicLong(1);
+
+    /** Cria uma unidade de medida com nome e sigla unicos (o banco e compartilhado entre as classes de teste). */
+    protected Long criarUnidade(String token, String fatorKg) {
+        record UnidadeReq(String nome, String sigla, java.math.BigDecimal fatorKg) {
+        }
+        record UnidadeResp(Long id) {
+        }
+        long n = SEQUENCIA_UNIDADE.getAndIncrement();
+        return post("/api/unidades", token, new UnidadeReq("Unidade de teste " + n, "ut" + n, new java.math.BigDecimal(fatorKg)),
+                UnidadeResp.class).getBody().id();
+    }
+
     /** Cria um catalogo simples (produto, categoria de gasto ou destino) e devolve o id. */
     protected Long criarCatalogoSimples(String caminho, String token, String nome) {
         record NomeReq(String nome) {

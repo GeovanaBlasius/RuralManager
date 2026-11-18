@@ -1,11 +1,41 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../api/client';
 import { useAuth } from '../auth';
 import { LINKS_SECUNDARIOS } from '../ui/Layout';
-import { Icones } from '../ui/componentes';
+import { Icones, MensagemErro } from '../ui/componentes';
 
 interface EventoInstalacao extends Event {
   prompt: () => Promise<void>;
+}
+
+/** So aparece onde a API libera (RM_DEMO_HABILITADO): carrega os dados de exemplo do trabalho de Banco de Dados. */
+function DadosDeDemonstracao() {
+  const qc = useQueryClient();
+  const estado = useQuery({ queryKey: ['demo'], queryFn: () => api.get<{ habilitado: boolean; jaCarregado: boolean }>('/api/demo') });
+  const carregar = useMutation({
+    mutationFn: () => api.post<{ carregou: boolean; mensagem: string }>('/api/demo/carregar', { confirmar: true }),
+    onSuccess: async () => { await qc.invalidateQueries(); },
+  });
+
+  if (!estado.data?.habilitado) return null;
+  function pedir() {
+    if (window.confirm('Carregar os dados de exemplo nesta conta? Eles se somam aos que já existem.')) carregar.mutate();
+  }
+
+  return (
+    <div className="cartao" style={{ marginTop: 18 }}>
+      <h2>Dados de demonstração</h2>
+      <p style={{ marginTop: 6 }}>Carrega os dados de exemplo do trabalho (safras, culturas, colheitas, gastos, clientes e vendas).</p>
+      <MensagemErro erro={carregar.error} />
+      {carregar.data && <p style={{ marginTop: 8, color: 'var(--verde-escuro)' }}>{carregar.data.mensagem}</p>}
+      <button type="button" className="btn cheio" style={{ marginTop: 10 }}
+        disabled={carregar.isPending || estado.data.jaCarregado} onClick={pedir}>
+        {estado.data.jaCarregado ? 'Já carregados nesta conta' : carregar.isPending ? 'Carregando…' : 'Carregar dados de exemplo'}
+      </button>
+    </div>
+  );
 }
 
 export function Mais() {
@@ -48,6 +78,8 @@ export function Mais() {
           </div>
         </div>
       ))}
+
+      <DadosDeDemonstracao />
 
       {!emStandalone && (
         <div className="cartao" style={{ marginTop: 18 }}>
