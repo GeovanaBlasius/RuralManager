@@ -15,3 +15,6 @@ legacy/out/
 legacy/lib/
 legacy/logs/
 legacy/backups/
+
+# Backups do banco (contem dados pessoais): nunca no Git
+backups/

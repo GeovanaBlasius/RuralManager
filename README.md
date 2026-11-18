@@ -16,6 +16,7 @@ Gestão agrícola para pequenos e médios produtores: safras, culturas, colheita
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Deploy](#deploy)
 - [Segurança](#segurança)
+- [Limitações conhecidas](#limitações-conhecidas)
 - [Status do projeto](#status-do-projeto)
 
 ## Sobre o projeto
@@ -161,12 +162,18 @@ Testes: `mvn test` (API) e `cd frontend && npm test`.
 
 **Local / VPS único:** `docker compose up --build` sobe a API e o front (nginx, porta 8081, com proxy `/api`).
 
-**Render.com (hospedagem gratuita, sem domínio próprio):** o repositório já tem um `render.yaml` pronto.
+**Render.com (hospedagem gratuita, sem domínio próprio):** o repositório já tem um `render.yaml` pronto. Passo a passo:
 
-1. Crie uma conta grátis em [render.com](https://render.com).
-2. **New > Blueprint**, conecte este repositório no GitHub. O Render lê o `render.yaml` e propõe dois serviços: `ruralmanager-api` e `ruralmanager-web`.
-3. Preencha os campos secretos que ele pedir (os mesmos valores do seu `.env` local: `RM_DB_URL`, `RM_DB_PASSWORD`, `RM_JWT_SECRET`, `RM_RESEND_API_KEY`, `RM_ADMIN_EMAIL`, `RM_ADMIN_SENHA`).
-4. Aguarde o build dos dois serviços e abra a URL do serviço `ruralmanager-web` (o Render mostra no painel; se os nomes `ruralmanager-api`/`ruralmanager-web` já estiverem em uso, ele acrescenta um sufixo, ex. `ruralmanager-web-w8cf.onrender.com`; nesse caso ajuste `RM_CORS_ORIGENS` e `VITE_API_URL` no `render.yaml` para os nomes finais).
+1. **Banco (Supabase).** Crie um projeto em [supabase.com](https://supabase.com). Em *Project Settings > Database > Connection string*, copie a URL **JDBC** do *Session pooler* (porta 5432) e anote a senha do banco. Você não precisa criar tabelas: o Flyway cria tudo na primeira subida da API.
+2. **E-mail (Resend).** Em [resend.com](https://resend.com) crie uma API Key. Para enviar o código de confirmação a **qualquer** pessoa, verifique um domínio em *Domains* e use um remetente dele em `RM_EMAIL_REMETENTE`. Sem domínio, o Resend só entrega para o e-mail dono da conta (serve para testar).
+3. **Segredo do token.** Gere uma sequência longa e aleatória para `RM_JWT_SECRET` (32+ caracteres), por exemplo `openssl rand -base64 48`. Não reutilize o de testes.
+4. **Render.** Crie conta em [render.com](https://render.com) e use **New > Blueprint**, conectando este repositório. O Render lê o `render.yaml` e propõe dois serviços: `ruralmanager-api` e `ruralmanager-web`.
+5. **Variáveis secretas.** Preencha o que ele pedir: `RM_DB_URL`, `RM_DB_PASSWORD`, `RM_JWT_SECRET`, `RM_RESEND_API_KEY`, `RM_ADMIN_EMAIL` e `RM_ADMIN_SENHA` (12+ caracteres; cria o primeiro administrador). Deixe `RM_OPENAPI=false` e **não** defina `RM_DEMO_HABILITADO`.
+6. **Nomes e CORS.** Aguarde o build. Se `ruralmanager-api`/`ruralmanager-web` já estiverem em uso, o Render acrescenta um sufixo (ex. `ruralmanager-web-w8cf.onrender.com`): então ajuste `RM_CORS_ORIGENS` (URL do front) na API e `VITE_API_URL` (URL da API) no front, no `render.yaml` ou no painel, e faça novo deploy.
+7. **Teste.** Abra `https://SUA-API.onrender.com/actuator/health/readiness` (deve mostrar `UP`), depois a URL do `ruralmanager-web`, crie uma conta e confirme o código recebido por e-mail.
+8. **Backup.** Configure agora, não depois: [`docs/OPERACAO.md`](docs/OPERACAO.md).
+
+O deploy acontece sozinho a cada push na `main`; as migrations novas rodam na subida da API.
 
 No plano gratuito, cada serviço "dorme" depois de 15 min sem acesso e demora alguns segundos para acordar na próxima visita. O deploy acontece automaticamente a cada push na branch `main`.
 
@@ -181,6 +188,23 @@ JWT stateless, BCrypt(12), CPF/CNPJ validados por dígito verificador, isolament
 **Onde fica o token:** o JWT fica em `localStorage` (a sessão sobrevive a recarregar a página e funciona no PWA offline). O risco conhecido é que um XSS poderia ler o token; por isso o `nginx` serve o front com Content-Security-Policy restritiva (`default-src 'self'`, sem scripts de terceiros, `frame-ancestors 'none'`), o React escapa o conteúdo por padrão, a validade do token é de 8 h e não há `dangerouslySetInnerHTML` no código. A alternativa (cookie `HttpOnly` + proteção CSRF) exige API e front no mesmo site; como no Render gratuito são domínios diferentes, a escolha foi manter o `localStorage` com essas mitigações. Se um dia API e front passarem a compartilhar domínio, migrar para cookie `HttpOnly; Secure; SameSite=Strict` é o caminho.
 
 Testado ativamente contra isolamento entre contas, token forjado ou adulterado, escalada de privilégio entre papéis (Operador/Produtor/Admin), força bruta de login e injeção SQL/XSS: nenhum desses ataques teve sucesso. Detalhes e metodologia na [release mais recente](../../releases/latest).
+
+## Limitações conhecidas
+
+Decisões tomadas de propósito ou pontos ainda abertos, para ninguém descobrir só em produção:
+
+- **Plano gratuito do Render:** a API dorme após 15 min sem uso; o primeiro acesso leva até cerca de 1 minuto (o app avisa e repete sozinho). Não há garantia de disponibilidade.
+- **E-mail:** sem `RM_RESEND_API_KEY` o cadastro novo (com verificação ligada) e a recuperação de senha ficam indisponíveis (503, com mensagem). Com o remetente de teste do Resend só chega e-mail ao dono da conta Resend.
+- **Token em `localStorage`:** exposto a roubo se houver XSS; mitigado por CSP restritiva no front, validade de 8 h e nenhum HTML injetado. Não há como encerrar um token antes de expirar (sem lista de revogação) além de desativar o usuário.
+- **Limitador de tentativas por instância:** vale na memória de cada instância e zera ao reiniciar. Para mais de uma instância, use rate limit no gateway.
+- **Backup:** não é automático. Depende do plano do Supabase ou da rotina de [`docs/OPERACAO.md`](docs/OPERACAO.md); sem isso, não há como recuperar dados apagados.
+- **Offline:** só gasto, colheita e saída podem ser lançados sem internet; o relatório e as listas não ficam disponíveis offline. Se o mesmo lançamento for refeito à mão e também estiver na fila, ele duplica (o sistema não detecta duplicidade).
+- **Exportação:** CSV e PDF (impressão do navegador); não há XLSX nem PDF gerado no servidor.
+- **Janela do plantio:** a regra "plantio dentro da safra" usa o ano da safra, não datas de início e fim.
+- **Documentos:** CPF/CNPJ são validados só pelo formato e dígito verificador, sem consulta à Receita.
+- **Idioma e moeda:** só português do Brasil e reais.
+- **Testes de interface:** o front tem testes de lógica (formatação, exportação, fila offline, retentativa), mas não testes automáticos de tela; as telas dependem de conferência manual.
+- **Ainda não coberto por teste dedicado:** algumas regras de validação simples (ver o fim de [`docs/REGRAS.md`](docs/REGRAS.md)).
 
 ## Status do projeto
 
